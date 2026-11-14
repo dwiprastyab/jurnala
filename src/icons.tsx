@@ -18,3 +18,13 @@ export const Chevron = ({ d, size = 18 }: { d: string; size?: number }) => <Svg 
 export const Check = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2A2440" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path pathLength={1} d="M5 12.5l4.5 4.5L19 7.5" /></svg>
 )
+
+const MEDALS: Record<number, string> = {
+  7: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  14: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.2 1 2 2 2-.5-3 0-6 1-8z"/>',
+  30: '<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>',
+  60: '<path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  100: '<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M10 18h4"/>',
+  180: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+}
+export const Medal = ({ n }: { n: number }) => <Svg d={MEDALS[n]} />

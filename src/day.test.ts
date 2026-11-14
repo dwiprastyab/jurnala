@@ -68,3 +68,21 @@ describe('no toISOString for days', () => {
     expect(hits).toEqual([])
   })
 })
+
+import { quoteOfDay } from './quote'
+describe('quoteOfDay', () => {
+  it('changes with the day and is stable within it', () => {
+    expect(quoteOfDay('2026-11-15')).toBe(quoteOfDay('2026-11-15'))
+    expect(quoteOfDay('2026-11-15')).not.toBe(quoteOfDay('2026-11-16'))
+  })
+})
+
+describe('long and short dates', () => {
+  it('formats with year, short and month names', async () => {
+    const { longDateY, shortDate, MONTH_ABBR } = await import('./day')
+    expect(longDateY('2026-11-06')).toBe('Friday, 6 November 2026')
+    expect(shortDate('2026-11-06')).toBe('6 Nov')
+    expect(MONTH_ABBR).toHaveLength(12)
+    expect(MONTH_ABBR[0]).toBe('Jan')
+  })
+})

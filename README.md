@@ -2,7 +2,7 @@
 
 A habit tracker with a guided daily reflection. Tick off your habits, answer four fixed questions each evening, and be done in under two minutes. It sits on a full-screen illustrated scene that follows the time of day.
 
-> **Status: backend and frontend built locally, not deployed.** B1 and B3–B8 are done and run on `wrangler dev` / Vite. B2 (PBKDF2 spike on the real free plan) and B10 (production deploy) are still pending and need the owner. Nothing runs on Cloudflare yet.
+> **Status: backend and frontend built locally, not deployed.** B1 and B3–B9 are done and run on `wrangler dev` / Vite. B2 (PBKDF2 spike on the real free plan) and B10 (production deploy) are still pending and need the owner. Nothing runs on Cloudflare yet.
 
 Jurnala is a **learning project**. The main goal is to learn free hosting on Cloudflare: Workers, Static Assets and D1. Version 1 "graduates" when its owner has used it in production for 14 days in a row. It is built for one person, mostly on a phone, mostly in the evening. It is not a multi-user product yet (see [Known limits](#known-limits-accepted-for-v1)).
 
@@ -113,7 +113,7 @@ Ten tasks, done in order, one commit each, each with a check that must pass befo
 | B6 (done) | Reflections, day view, history, insights, CSV export | |
 | B7 (done) | Isolation tests: user A vs user B on every endpoint | |
 | B8 (done) | UI: theme and scenes, tokens, Sign in, Today (including a text-contrast measurement over the scenes) | |
-| B9 | UI: History, Habits, Settings, empty and error states | |
+| B9 (done) | UI: History, Habits, Settings, empty and error states | |
 | B10 | Production deploy and runbook | Production access |
 
 ## Success measures

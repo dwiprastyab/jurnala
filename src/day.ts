@@ -33,3 +33,6 @@ const dt = (day: string, opts: Intl.DateTimeFormatOptions) =>
 export const longDate = (day: string) => dt(day, { weekday: 'long', day: 'numeric', month: 'long' })
 export const weekdayName = (day: string) => dt(day, { weekday: 'long' })
 export const monthTitle = (month: string) => dt(`${month}-01`, { month: 'long', year: 'numeric' })
+export const longDateY = (day: string) => dt(day, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+export const shortDate = (day: string) => dt(day, { day: 'numeric', month: 'short' })
+export const MONTH_ABBR = Array.from({ length: 12 }, (_, i) => dt(`2001-${p2(i + 1)}-01`, { month: 'short' }))

@@ -1,6 +1,6 @@
 # Jurnala v1 — Architecture
 
-How the pieces fit. The backend (B1, B3–B7) and the frontend (B8 onward) exist and run locally; B2 (PBKDF2 spike) and B10 (production deploy) are pending (see [`plan.md`](plan.md)). Where this file and [`api.md`](api.md) disagree on shapes, `api.md` wins. Where it and [`PRD.md`](PRD.md) disagree on behaviour, `PRD.md` wins.
+How the pieces fit. The backend (B1, B3–B7) and the frontend (B8, B9) exist and run locally; B2 (PBKDF2 spike) and B10 (production deploy) are pending (see [`plan.md`](plan.md)). Where this file and [`api.md`](api.md) disagree on shapes, `api.md` wins. Where it and [`PRD.md`](PRD.md) disagree on behaviour, `PRD.md` wins.
 
 ## Overview
 

@@ -38,7 +38,7 @@ Habit tracker + guided daily reflection. A learning project: the main goal is to
 
 ## Unverified assumptions
 
-Text contrast over the Scenes (Today measured in B8, passes 4.5:1 in all phases and both themes at 390 and 1440, see DESIGN.md; History and Settings are measured in B9); scene SVG animation cost on low-end phones; D1 free daily row read/write quotas; the Workers runtime cap on PBKDF2 iterations (believed 100,000); whether `jurnala` is free as a Worker name on the Owner's account.
+Text contrast over the Scenes (Today measured in B8 at 390 and 1440, History, Habits and Settings in B9 at 390; all pass 4.5:1 in every phase and both themes, worst 4.83, see DESIGN.md; not measured: day sheet, dialogs, Insights, scene animation); scene SVG animation cost on low-end phones; D1 free daily row read/write quotas; the Workers runtime cap on PBKDF2 iterations (believed 100,000); whether `jurnala` is free as a Worker name on the Owner's account.
 
 ## Agent skills
 

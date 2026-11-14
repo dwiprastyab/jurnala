@@ -39,7 +39,7 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T>
 export const api = {
   me: () => call<{ user: User }>('GET', '/me'),
   login: (email: string, password: string) => call<{ user: User }>('POST', '/login', { email, password }),
-  logout: () => call<void>('POST', '/logout'),
+  logout: () => call<void>('POST', '/logout', {}),
   habits: (archived = false) => call<{ habits: Habit[] }>('GET', `/habits${archived ? '?archived=1' : ''}`),
   addHabit: (name: string) => call<{ habit: Habit }>('POST', '/habits', { name }),
   patchHabit: (id: number, patch: { name?: string; sort?: number; archived?: boolean }) => call<{ habit: Habit }>('PATCH', `/habits/${id}`, patch),
@@ -49,4 +49,14 @@ export const api = {
   saveEntry: (day: string, e: EntryInput) => call<{ entry: Entry }>('PUT', `/entries/${day}`, e),
   history: (from: string, to: string) => call<{ days: HistoryDay[] }>('GET', `/history?from=${from}&to=${to}`),
   insights: (today: string) => call<InsightsData>('GET', `/insights?today=${today}`),
+  exportCsv: async () => {
+    let res: Response
+    try { res = await fetch('/api/export', { credentials: 'same-origin' }) }
+    catch { throw new ApiError("Can't reach the server. Check your connection and try again.", 0) }
+    if (!res.ok) {
+      if (res.status === 401) onUnauthorized()
+      throw new ApiError((await res.json().catch(() => null))?.error ?? 'Something went wrong. Try again.', res.status)
+    }
+    return res.blob()
+  },
 }

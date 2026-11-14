@@ -248,7 +248,17 @@ Method: real rendered pixels. Per run, one screenshot with all text transparent 
 
 First pass failed (lowest values before the fix): Scenes dawn sub line 2.58, Scenes day h1 3.70 and sub line 1.69 at 390; Classic dawn h1 3.85 and sub 2.85; at 1440 Scenes day glass 4.03 and sub 2.55, Scenes night h1 4.19. Fixes, all in `src/index.css` (scene SVGs untouched): darker top scrim, a double text-shadow on Scenes `h1` and `.head p`, a dark backing bar behind the page header on Scenes (phones: stronger on day; from 700px: a rounded bar), a light header bar on Classic dawn like Classic day, glass 0.68 on Scenes day and 0.54 on Scenes dawn. Then re-measured: every group at or above 4.5:1. The 390 re-run of Scenes day glass was done at the old 0.55 value (6.04); the later 0.68 can only raise it.
 
-Not measured yet in this section: History and Settings including the legend (task B9), the sheet and dialog, and text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run).
+**History, Settings and Habits (task B9), width 390, Scenes and Classic, all four phases, 2026-11-15:**
+
+| Screen | Worst ratio | Where it is worst |
+|---|---|---|
+| History (incl. legend, weekday row, enabled day numbers) | 5.39 | Scenes dawn, month title |
+| Settings (incl. helper lines, segmented control, buttons) | 5.47 | Scenes dawn, glass body text |
+| Habits (incl. list, Archived heading, rename and confirm lines) | 5.59 | Scenes dawn, glass body text |
+
+Legend worst: 7.32 (Classic dawn). Day numbers worst: 7.35 (Scenes dawn). No fix was needed for B9. Day cells that are disabled (before sign-up, or in the future) are dimmed to 30% on purpose and are not measured: WCAG exempts inactive controls, and the accessible label says why ("before you joined").
+
+Not measured: the day sheet and the discard dialog, text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run), Insights, and widths other than 390 for these three screens.
 
 ## Copy
 

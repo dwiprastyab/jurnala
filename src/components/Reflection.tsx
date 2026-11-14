@@ -11,10 +11,10 @@ const PROMPTS: [keyof Texts, string, string, boolean?][] = [
 ]
 const toTexts = (e: Entry | null): Texts => ({ went_well: e?.went_well ?? '', was_hard: e?.was_hard ?? '', tomorrow: e?.tomorrow ?? '' })
 
-type Props = { day: string; entry: Entry | null; title?: string; said?: string | null; onSaved: (e: Entry) => void; focusEdit?: boolean }
+type Props = { day: string; entry: Entry | null; title?: string; said?: string | null; onSaved: (e: Entry) => void; bare?: boolean }
 
 // One component for Today and for the day sheet in History. Parent passes key={day} so state resets per day.
-export function Reflection({ day, entry, title = "Today's reflection", said, onSaved }: Props) {
+export function Reflection({ day, entry, title = "Today's reflection", said, onSaved, bare }: Props) {
   const [mode, setMode] = useState<'read' | 'edit'>(entry ? 'read' : 'edit')
   const [mood, setMood] = useState<number | null>(entry?.mood ?? null)
   const [t, setT] = useState<Texts>(toTexts(entry))
@@ -53,7 +53,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
   const read = mode === 'read'
   const label = read ? 'Edit reflection' : saved ? 'Save changes' : 'Save reflection'
   return (
-    <form className="glass stack" id="reflection" data-mode={mode} onSubmit={submit} onKeyDown={(e) => { if (e.key === 'Escape' && saved && !read) { e.stopPropagation(); cancel() } }} noValidate>
+    <form className={bare ? 'stack' : 'glass stack'} id="reflection" data-mode={mode} onSubmit={submit} onKeyDown={(e) => { if (e.key === 'Escape' && saved && !read) { e.stopPropagation(); e.preventDefault(); cancel() } }} noValidate>
       <h2>{title}</h2>
       {said && <div className="said"><p className="muted small">Yesterday you said</p><p className="prompt">{said}</p></div>}
       <div className="rbody">
