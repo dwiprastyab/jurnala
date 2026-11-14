@@ -1,6 +1,6 @@
 # Development
 
-> **Status: nothing below runs yet.** There is no `package.json`. Task B1 creates the project. Commands in the "Planned" section are what B1 is meant to provide; each is checked by B1's "Done when". Until then, only the design preview works.
+> **Status:** the backend and the frontend run locally. Nothing is deployed; B2 (PBKDF2 spike) and B10 (deploy) are pending.
 
 ## Works today: preview the design
 
@@ -12,22 +12,24 @@ python3 -m http.server 8912
 
 Details in [`../design/README.md`](../design/README.md).
 
-## Prerequisites (for B1 onwards)
+## Prerequisites
 
 - Node.js and npm (a current LTS).
 - A Cloudflare account on the free plan, and `npx wrangler login`. Needed from task B2 (first deploy). Not needed for B1, B3–B7 locally.
 - `git` and, for issues, the `gh` CLI.
 
-## Planned commands (from [`plan.md`](plan.md) B1)
+## Commands
 
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Vite dev server with the Worker; `curl -s localhost:5173/api/health` returns `{"ok":true}` |
 | `npx vitest run` | Tests against a real local D1 via `@cloudflare/vitest-plugin` |
 | `npx wrangler d1 migrations apply DB --local` | Apply migrations to the local D1 (B3) |
-| `npx wrangler deploy` | Deploy to production (first at B2) |
+| `npm run build` | Typecheck (`tsc -b`) and build the SPA and Worker |
+| `npx tsc -b` | Typecheck only |
+| `npx wrangler deploy` | Deploy to production (first at B2; not done yet) |
 
-The admin script (`scripts/create-user.ts`, B4) creates accounts and prints the password once. Run it with `--remote` only for production.
+Create a local account: `npx tsx scripts/create-user.ts you@example.com "Your name" --local`. It prints the generated password once. Run it with `--remote` only for production. Then open the Vite URL and sign in.
 
 ## How to work
 

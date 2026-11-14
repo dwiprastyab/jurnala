@@ -231,7 +231,24 @@ For each phase (four) and each theme (two): screenshot Today and History at 390p
 
 ### Measured contrast
 
-_Not yet measured._
+Method: real rendered pixels. Per run, one screenshot with all text transparent (background plus text-shadow only) and one normal; text pixels are found by the difference, the text colour is composited with its alpha, and the WCAG ratio is taken per glyph pixel. Groups: h1, the line under it, muted helper lines, glass body text (h2, prompts, habit names, fields, moods). Worst ratio over all groups, per theme and phase, measured with the Playwright MCP against `npm run dev`, 2026-11-15.
+
+**Today (task B8), widths 390 and 1440, signed-in demo data:**
+
+| Theme / phase | Worst ratio | Where it is worst |
+|---|---|---|
+| Scenes dawn | 4.83 | glass body text at 1440 |
+| Scenes day | 5.72 | glass body text at 1440 |
+| Scenes dusk | 5.31 | glass body text at 390 |
+| Scenes night | 6.80 | glass body text at 1440 |
+| Classic dawn | 6.54 | muted line under h1 at 1440 |
+| Classic day | 6.31 | muted line under h1 at 1440 |
+| Classic dusk | 4.88 | muted line under h1 at 1440 |
+| Classic night | 9.75 | glass body text at 390 |
+
+First pass failed (lowest values before the fix): Scenes dawn sub line 2.58, Scenes day h1 3.70 and sub line 1.69 at 390; Classic dawn h1 3.85 and sub 2.85; at 1440 Scenes day glass 4.03 and sub 2.55, Scenes night h1 4.19. Fixes, all in `src/index.css` (scene SVGs untouched): darker top scrim, a double text-shadow on Scenes `h1` and `.head p`, a dark backing bar behind the page header on Scenes (phones: stronger on day; from 700px: a rounded bar), a light header bar on Classic dawn like Classic day, glass 0.68 on Scenes day and 0.54 on Scenes dawn. Then re-measured: every group at or above 4.5:1. The 390 re-run of Scenes day glass was done at the old 0.55 value (6.04); the later 0.68 can only raise it.
+
+Not measured yet in this section: History and Settings including the legend (task B9), the sheet and dialog, and text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run).
 
 ## Copy
 
