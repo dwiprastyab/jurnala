@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="en" data-phase="dusk" data-theme="scenes">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jurnala mockup</title>
+<link rel="icon" href="favicon/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --ink: #2A2440; --muted: #3F3956;
+  --glass: rgb(255 255 255 / .38); --glass-line: rgb(255 255 255 / .55);
+  --field: rgb(255 255 255 / .45); --solid: #F3EEF5;
+  --glow: #F0A23B; --btn-bg: #2A2440; --btn-ink: #FBF7F0;
+  --shadow: 0 12px 40px rgb(42 36 64 / .12);
+  --mood-1: #7C8DB5; --mood-2: #9DB4C8; --mood-3: #C9C2B0; --mood-4: #F2C894; --mood-5: #FFB37A;
+  --stars: 0; --orb-y: 20%; --orb-size: 96px;
+  --ease: cubic-bezier(.22, 1, .36, 1); --spring: cubic-bezier(.3, 1.6, .5, 1);
+  --serif: Newsreader, Georgia, serif; --sans: Figtree, system-ui, sans-serif;
+}
+html[data-phase="dawn"]  { --sky-a: #F6C6A8; --sky-b: #D9B4C6; --sky-c: #B9A8E0; --blob-1: #FFE2B8; --blob-2: #E7B6D8; --orb: #FFE9CF; }
+html[data-phase="day"]   { --sky-a: #9CC9F0; --sky-b: #BFDDF6; --sky-c: #DCEBFA; --blob-1: #FFFFFF; --blob-2: #BDE3F2; --orb: #FBFDFF; }
+html[data-phase="dusk"]  { --sky-a: #904C5C; --sky-b: #5B4B8A; --sky-c: #2F2A5E; --blob-1: #9A5258; --blob-2: #7A5FB0; --orb: #AE6062; }
+html[data-phase="night"] { --sky-a: #141B3C; --sky-b: #1F2046; --sky-c: #2A2550; --blob-1: #3A3F86; --blob-2: #5A3F7A; --orb: #7C7AA8; --stars: 1; --orb-size: 60px; }
+html[data-phase="dusk"], html[data-phase="night"] {
+  --ink: #FBF7F0; --muted: #ECE8F4;
+  --glass: rgb(20 16 48 / .40); --glass-line: rgb(255 255 255 / .16);
+  --field: rgb(255 255 255 / .08); --solid: #262250;
+  --glow: #FFD9A0; --btn-bg: #FBF7F0; --btn-ink: #2A2440;
+  --shadow: 0 12px 40px rgb(8 6 24 / .35);
+}
+
+/* registered so the sky can fade between phases instead of snapping */
+@property --sky-a { syntax: "<color>"; inherits: true; initial-value: #904C5C; }
+@property --sky-b { syntax: "<color>"; inherits: true; initial-value: #5B4B8A; }
+@property --sky-c { syntax: "<color>"; inherits: true; initial-value: #2F2A5E; }
+
+
+/* ---------- Scenes theme (default): fixed vector landscape, content scrolls over it. Rules from scenes/layout.css ---------- */
+.bgwrap { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--scene-base, #3C2B57); display: none; transition: background-color 1.2s ease; }
+[data-theme="scenes"] .bgwrap { display: block; }
+[data-theme="scenes"] .sky { display: none; }
+[data-theme="scenes"] { background: var(--scene-base, #3C2B57); }
+.bgwrap .layer { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 1.2s var(--ease), visibility 0s 1.2s; }
+.bgwrap .layer img { position: absolute; left: 0; top: 0; width: 100%; height: 460px; object-fit: cover; object-position: 100% 50%; -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }
+.bgwrap .s-night img { object-position: 50% 50%; }
+[data-phase="dawn"] .s-dawn, [data-phase="day"] .s-day, [data-phase="dusk"] .s-dusk, [data-phase="night"] .s-night { opacity: 1; visibility: visible; transition-delay: 0s; }
+.bgwrap .scrim { position: absolute; left: 0; right: 0; top: 0; height: 330px; background: linear-gradient(rgb(10 8 30 / .35), transparent 35%, transparent 50%, rgb(10 8 30 / .55)); }
+html[data-phase="dawn"] { --scene-base: #7E6AAE; } html[data-phase="day"] { --scene-base: #2E5240; }
+html[data-phase="dusk"] { --scene-base: #3C2B57; } html[data-phase="night"] { --scene-base: #05060F; }
+/* one dark glass token set on every Scenes phase, a little more opaque by day and dawn */
+[data-theme="scenes"] { --ink: #FBF7F0; --muted: #ECE8F4; --glass: rgb(20 16 48 / .40); --glass-line: rgb(255 255 255 / .22); --field: rgb(255 255 255 / .10); --solid: #1F1B45; --glow: #FFD9A0; --btn-bg: #FBF7F0; --btn-ink: #2A2440; --shadow: 0 12px 40px rgb(8 6 24 / .35); }
+[data-theme="scenes"][data-phase="day"] { --glass: rgb(20 16 56 / .55); }
+[data-theme="scenes"][data-phase="dawn"] { --glass: rgb(20 16 56 / .46); }
+[data-theme="scenes"] h1 { text-shadow: 0 1px 8px rgb(10 8 30 / .5); }
+@media (prefers-reduced-motion: reduce) { .bgwrap .layer { transition: none; } }
+
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+html { transition: --sky-a 1.2s ease, --sky-b 1.2s ease, --sky-c 1.2s ease; min-height: 100%; background: linear-gradient(180deg, var(--sky-a), var(--sky-b) 55%, var(--sky-c)) fixed; }
+body { margin: 0; min-height: 100dvh; color: var(--ink); transition: color .6s ease; font: 400 16px/1.5 var(--sans); overflow-x: hidden; }
+h1, h2, .prompt, .brand { font-family: var(--serif); font-weight: 400; margin: 0; }
+h1 { font-size: clamp(34px, 2.2vw + 24px, 52px); line-height: 1.1; letter-spacing: -.015em; }
+h2 { font-size: 24px; line-height: 1.25; }
+.prompt { font-size: 20px; line-height: 1.3; font-style: italic; }
+p { margin: 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+/* ---------- sky: the sun (or moon) sits where the clock says ---------- */
+.sky { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.orb { position: absolute; top: var(--orb-y); right: -24px; width: var(--orb-size); height: var(--orb-size); border-radius: 50%; background: var(--orb); transition: top 1.2s ease, background 1.2s ease; }
+.orb::before { content: ""; position: absolute; inset: -260%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--blob-1) 50%, transparent), transparent); }
+.blob { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(80px); opacity: .5; background: var(--blob-2); bottom: -35vmax; left: -30vmax; animation: drift 90s ease-in-out infinite alternate; }
+.stars { position: absolute; inset: 0; opacity: var(--stars); transition: opacity 1.2s ease; }
+.stars i { position: absolute; top: 0; left: 0; width: 1px; height: 1px; border-radius: 50%; background: transparent; animation: twinkle 6s ease-in-out infinite alternate; }
+.stars i + i { animation-delay: -3s; animation-duration: 8s; }
+@keyframes twinkle { to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .stars i { animation: none; } }
+/* fine grain so the sky reads as air, not a flat gradient */
+.sky::after { content: ""; position: absolute; inset: 0; opacity: .08; mix-blend-mode: soft-light;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+@keyframes drift { to { transform: translate3d(6vmax, -4vmax, 0) scale(1.08); } }
+
+/* ---------- layout: phone first ---------- */
+.app { max-width: 480px; margin: 0 auto; padding: 16px 16px 128px; }
+option { color: #2A2440; }
+.screen { display: grid; gap: 16px; animation: fade .24s var(--ease); }
+.col { display: grid; gap: 16px; align-content: start; min-width: 0; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+[role="status"]:not(:empty), #closing { animation: fade .4s var(--ease); }
+.glass { background: var(--glass); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); border: 1px solid var(--glass-line); border-radius: 24px; box-shadow: var(--shadow); padding: 20px; transition: background-color .6s ease, border-color .6s ease; }
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 4px 8px; }
+.head p { margin-top: 6px; }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-line); background: var(--glass); display: grid; place-items: center; flex: none; }
+/* first row of the reflection card, so both Today cards start at the same height */
+/* Save/Edit and Cancel are small icon buttons in the card's top-right corner, so the answers get the room */
+#reflection { position: relative; }
+#reflection .row { position: absolute; top: 14px; right: 16px; gap: 8px; flex-wrap: nowrap; }
+#reflection .row #saved { order: -1; font-size: 14px; }
+#reflection .row [data-tip]::after { bottom: auto; top: calc(100% + 6px); left: auto; right: 0; transform: none; }
+.said { padding-bottom: 16px; border-bottom: 1px solid var(--glass-line); }
+.said .prompt { font-size: 22px; font-style: normal; margin-top: 2px; }
+/* one line of encouragement under the habits; fades out by itself */
+.cheer { font-size: 20px; padding: 0 4px; }
+/* "View scene": hides every card so the landscape is the whole screen */
+.view { position: fixed; z-index: 4; right: 16px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 64px); background: var(--solid); }
+/* Scene mode: cards fly to their tab (JS), then stay hidden. Brand, tabs and the eye remain. */
+.viewing .screen { visibility: hidden; pointer-events: none; }
+.bgwrap { transition: background-color 1.2s ease, transform 1.6s var(--ease); }
+.bgwrap .scrim { transition: opacity 1s ease; }
+.sky { transition: transform 1.6s var(--ease); }
+.viewing .bgwrap, .viewing .sky { transform: scale(1.04); }
+.viewing .bgwrap .scrim { opacity: .35; }
+.quote { display: none; padding: 56px 4px 0; }
+.viewing.q .quote { display: block; animation: fade .7s var(--ease) .1s backwards; }
+.quote p { font-family: var(--serif); font-style: italic; font-size: clamp(30px, 4vw + 12px, 52px); line-height: 1.15; max-width: 16em; text-wrap: balance; text-shadow: 0 1px 18px rgb(10 8 30 / .45); }
+.quote small { display: block; margin-top: 12px; color: var(--muted); }
+
+/* sticky page header: a glass bar that stays while the page scrolls */
+.screen > .head { position: sticky; top: 8px; z-index: 3; padding: 14px 20px; }
+.signin > .head { position: static; background: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 16px 4px 8px; }
+
+/* tooltip for icon-only buttons */
+[data-tip] { position: relative; }
+[data-tip]::after { content: attr(data-tip); position: absolute; z-index: 5; bottom: calc(100% + 6px); left: 50%; transform: translate(-50%, 4px); white-space: nowrap; padding: 6px 10px; border-radius: 10px; background: var(--solid); border: 1px solid var(--glass-line); color: var(--ink); font-size: 13px; font-weight: 500; line-height: 1.2; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility 0s .15s; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: .35s, .35s, .35s; }
+[data-tip]:focus-visible::after { transition-delay: 0s; }
+.dragging [data-tip]::after { display: none; }
+
+/* reflection: read mode after Save */
+#reflection[data-mode="read"] .mood { pointer-events: none; }
+#reflection[data-mode="read"] .mood[aria-pressed="false"] { opacity: .35; }
+
+/* ---------- rich editor (journal) ---------- */
+.ed { position: relative; display: grid; gap: 6px; }
+.ed-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; }
+.ed-tools { display: flex; gap: 2px; }
+.ed-fmt { display: flex; gap: 2px; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+.ed:focus-within .ed-fmt, .ed.open .ed-fmt { opacity: 1; pointer-events: auto; }
+.ed.ro .ed-fmt { display: none; }
+.tool { width: 36px; height: 36px; border-radius: 10px; border: 0; background: transparent; display: grid; place-items: center; color: var(--muted); transition: background-color .2s ease, color .2s ease; }
+.tool:hover, .tool[aria-pressed="true"] { background: var(--field); color: var(--ink); }
+.tool svg { width: 18px; height: 18px; }
+.rte { height: var(--h, clamp(64px, 11dvh, 112px)); max-height: calc(7 * 1.5em + 20px); overflow-y: auto; overflow-wrap: anywhere; white-space: pre-wrap; outline-offset: 0; }
+.rte[data-size="s"] { --h: clamp(48px, 7dvh, 72px); }
+.rte ul, .rte ol { margin: 0; padding-left: 1.4em; white-space: normal; }
+.rte ul { list-style: disc; }
+.rte ol { list-style: decimal; }
+.rte:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
+.rte:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.ed.ro .field { background: transparent; border-color: transparent; padding-left: 0; padding-right: 0; }
+.emo { position: absolute; z-index: 2; right: 0; top: 40px; display: grid; grid-template-columns: repeat(8, 36px); gap: 2px; padding: 6px; border-radius: 16px; background: var(--solid); border: 1px solid var(--glass-line); box-shadow: var(--shadow); }
+.emo button { width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; font-size: 20px; }
+.emo button:hover { background: var(--field); }
+/* expanded: the field grows into a centred panel; the page behind stays visible */
+.ed.open { position: fixed; z-index: 30; margin: 0; padding: 16px 20px 20px; grid-template-rows: auto minmax(0, 1fr); overflow: visible; }
+.ed.open .rte { height: 100%; min-height: 0; font-size: 18px; line-height: 1.55; max-height: none; }
+.ed-spacer { visibility: hidden; }
+.ed-dim { position: fixed; inset: 0; z-index: 29; background: rgb(10 8 30 / .32); opacity: 0; transition: opacity .3s ease; }
+.ed-dim.on { opacity: 1; }
+
+/* ---------- controls ---------- */
+.btn { min-height: 48px; padding: 0 24px; border-radius: 999px; border: 0; background: var(--btn-bg); color: var(--btn-ink); font-weight: 600; }
+.btn.quiet { background: transparent; color: var(--ink); border: 1px solid var(--glass-line); font-weight: 500; }
+.btn.text { min-height: 44px; padding: 0 12px; background: transparent; color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.btn, .icon-btn, .mini, .day, .mood, .tabs button, .habit { transition: transform .15s var(--ease), background-color .2s ease, color .2s ease; }
+.btn:active, .icon-btn:active, .mini:active, .tabs button:active { transform: scale(.96); }
+.day:active { transform: scale(.9); }
+.field { transition: background-color .6s ease, border-color .6s ease; width: 100%; min-height: 48px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--glass-line); background: var(--field); }
+select.field { appearance: none; padding-right: 38px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; }
+[data-theme="classic"][data-phase="day"] select.field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23211c3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+.field::placeholder { color: var(--muted); opacity: 1; }
+label { display: grid; gap: 8px; }
+.settings-row .field { width: auto; min-width: 180px; }
+.stack { display: grid; gap: 20px; align-content: start; }
+hr { border: 0; border-top: 1px solid var(--glass-line); margin: 0; width: 100%; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+/* ---------- habits ---------- */
+.habits { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.habit { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 14px; padding: 8px; border: 0; border-radius: 14px; background: transparent; text-align: left; }
+@media (hover: hover) { .habit:hover, .mini:hover { background: var(--field); } }
+.tick { width: 28px; height: 28px; flex: none; border-radius: 50%; border: 2px solid var(--muted); display: grid; place-items: center; transition: background-color .2s ease, border-color .2s ease, transform .3s var(--spring); }
+.tick path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .28s var(--ease) .06s; }
+.habit:active .tick { transform: scale(.9); }
+.habit[aria-pressed="true"] .tick { background: var(--glow); border-color: var(--glow); transform: scale(1.08); }
+.habit[aria-pressed="true"] .tick path { stroke-dashoffset: 0; }
+.habit .name { flex: 1; transition: color .2s ease; }
+.habit[aria-pressed="true"] .name { color: var(--muted); }
+
+/* ---------- mood: five stops on one line ---------- */
+.moods { border: 0; margin: 0; padding: 0; min-width: 0; }
+.moods legend { padding: 0; margin-bottom: 4px; }
+.scale { display: flex; position: relative; }
+.mw { flex: 1; position: relative; display: flex; --tx: -50%; }
+.mw:first-child { --tx: 0; } .mw:last-child { --tx: 0; }
+.mw .mood { flex: 1; }
+/* hover and keyboard focus show what the face means; phones use the line under the faces */
+.tip { position: absolute; z-index: 3; bottom: calc(100% + 4px); left: 50%; width: 200px; transform: translate(var(--tx), 4px); padding: 10px 12px; border-radius: 14px; background: var(--solid); border: 1px solid var(--glass-line); box-shadow: var(--shadow); font-size: 14px; line-height: 1.4; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, transform .15s var(--ease), visibility 0s .15s; }
+.mw:first-child .tip { left: 0; } .mw:last-child .tip { left: auto; right: 0; }
+.mw:has(:focus-visible) .tip { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); transition-delay: 0s; }
+@media (hover: hover) { .mw:hover .tip { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); transition-delay: 0s; } }
+.mood { flex: 1; min-height: 76px; padding: 8px 0 0; display: grid; justify-items: center; align-content: start; gap: 6px; border: 0; border-radius: 14px; background: transparent; font-size: 13px; color: var(--muted); }
+.mood svg { width: 40px; height: 40px; opacity: .8; transition: transform .3s var(--spring), opacity .2s ease; }
+.mood[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+.mood[aria-pressed="true"] svg { transform: scale(1.2); opacity: 1; }
+
+/* ---------- history ---------- */
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--field); border: 1px solid var(--glass-line); }
+.seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
+/* Background switch: the pill glides across while the new background wipes in the same direction (1.4 s). */
+#theme-seg { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; }
+#theme-seg button { position: relative; z-index: 1; background: transparent !important; transition: color 1.4s cubic-bezier(.65,0,.35,1); }
+#theme-seg::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px); border-radius: 999px; background: var(--btn-bg); transition: transform 1.4s cubic-bezier(.65,0,.35,1); }
+[data-theme="classic"] #theme-seg::before { transform: translateX(calc(100% + 4px)); }
+#theme-seg { view-transition-name: themeseg; } /* the switch itself stays live above the wipe */
+/* History view switch: same pill glide; the panel slides and wipes in the switch direction (1.4 s). */
+.seg[aria-label="View"] { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; view-transition-name: viewseg; }
+.seg[aria-label="View"] button { position: relative; z-index: 1; background: transparent !important; transition: color 1.4s cubic-bezier(.65,0,.35,1); }
+.seg[aria-label="View"]::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px); border-radius: 999px; background: var(--btn-bg); transition: transform 1.4s cubic-bezier(.65,0,.35,1); }
+.seg[aria-label="View"][data-on="ins"]::before { transform: translateX(calc(100% + 4px)); }
+::view-transition-old(viewseg) { display: none; }
+::view-transition-group(viewseg), ::view-transition-new(viewseg) { animation: none; }
+html.vs .history { clip-path: inset(-60px 0); } /* panes slide inside the content area, never over the side nav */
+.history { position: relative; }
+@media (prefers-reduced-motion: reduce) { .seg[aria-label="View"]::before, .seg[aria-label="View"] button { transition: none; } }
+::view-transition-old(themeseg) { display: none; }
+::view-transition-group(themeseg), ::view-transition-new(themeseg) { animation: none; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: wipe-r 1.4s cubic-bezier(.65,0,.35,1) both; 
+  -webkit-mask-image: linear-gradient(90deg, #000 43.5%, transparent 56.5%); mask-image: linear-gradient(90deg, #000 43.5%, transparent 56.5%);
+  -webkit-mask-size: 230% 100%; mask-size: 230% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-image: linear-gradient(270deg, #000 43.5%, transparent 56.5%); mask-image: linear-gradient(270deg, #000 43.5%, transparent 56.5%); }
+/* Soft edge: a feathered mask slides across, so the boundary fades like an iPhone unlock instead of cutting. */
+@keyframes wipe-r { from { -webkit-mask-position: 100% 0; mask-position: 100% 0; } to { -webkit-mask-position: 0 0; mask-position: 0 0; } }
+@keyframes wipe-l { from { -webkit-mask-position: 0 0; mask-position: 0 0; } to { -webkit-mask-position: 100% 0; mask-position: 100% 0; } }
+.cal-title { order: -1; margin-right: auto; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cal-title { min-height: 44px; padding: 0 12px; border: 0; border-radius: 14px; background: transparent; font-family: var(--serif); font-size: 24px; display: inline-flex; align-items: center; gap: 6px; }
+.picker { display: grid; gap: 16px; }
+.years { display: flex; align-items: center; justify-content: space-between; font-family: var(--serif); font-size: 22px; }
+.months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.months button { min-height: 44px; border-radius: 14px; border: 1px solid var(--glass-line); background: transparent; }
+.months button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); border-color: transparent; }
+:disabled { opacity: .3; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px 0; justify-items: center; }
+.grid .wd { font-size: 13px; color: var(--muted); padding-bottom: 4px; }
+.day { width: 100%; max-width: 48px; height: 48px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; position: relative; }
+.day i { width: 36px; height: 36px; border-radius: 50%; background: var(--c, transparent); border: 1px dashed var(--muted); display: grid; place-items: center; font-style: normal; font-size: 15px; }
+.day[data-mood] i { border: 1px solid rgb(255 255 255 / .5); color: #2A2440; font-weight: 600; }
+.day[data-pre], .day[data-future] { opacity: .3; }
+.day[data-pre] i, .day[data-future] i { border-color: transparent; }
+/* small dot under the number = every habit done */
+.day[data-full]::after { content: ""; position: absolute; bottom: 1px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--glow); }
+.day[aria-current="date"] { box-shadow: inset 0 0 0 2px var(--ink); }
+.day[aria-pressed="true"] { background: var(--field); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+.legend i.dot { width: 6px; height: 6px; background: var(--glow); }
+/* insights */
+.ins { display: grid; gap: 16px; align-content: start; }
+.ic { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+.ic-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: none; }
+.ic-head .field { width: auto; min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.ic > p { margin: 0; flex: none; }
+.ic-body { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
+.ic-body.hscroll { overflow: hidden; align-content: stretch; display: flex; align-items: flex-end; justify-content: flex-end; gap: 4px; padding-bottom: 4px; }
+.ic-body.hscroll:has(.bar.g-day) { gap: 2px; }
+.ic .cap, .ic > .cap { min-height: 2.8em; }
+#ins [data-tip] { cursor: default; border-radius: 12px; }
+#ins [data-tip]:hover, #ins [data-tip]:focus-visible { background: var(--field); outline: none; }
+.btn.ib { width: 40px; height: 40px; min-height: 0; padding: 0; display: inline-grid; place-items: center; flex: none; }
+.btn.ib svg { width: 18px; height: 18px; }
+.btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 6px 4px; text-align: center; display: grid; gap: 4px; align-content: start; }
+.stat b { display: block; font-family: var(--serif); font-weight: 400; font-size: 34px; line-height: 1.1; }
+.chart { flex: 1 1 auto; min-height: 0; display: flex; gap: 6px; }
+.yax { flex: none; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-bottom: 24px; font-size: 11px; line-height: 1; color: var(--muted); }
+.chart .ic-body { flex: 1 1 auto; position: relative; padding-bottom: 0; }
+.chart .ic-body::before { content: ""; position: absolute; inset: 0 0 24px 0; pointer-events: none; background: linear-gradient(var(--glass-line), var(--glass-line)) top / 100% 1px no-repeat, linear-gradient(var(--glass-line), var(--glass-line)) center / 100% 1px no-repeat, linear-gradient(var(--glass-line), var(--glass-line)) bottom / 100% 1px no-repeat; opacity: .6; }
+.bar { position: relative; align-self: stretch; flex: 1 1 0; min-width: 0; max-width: 64px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; font-size: 12px; white-space: nowrap; color: var(--muted); text-align: center; }
+.bar .plot { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.bar .fill { width: 100%; max-width: 36px; height: calc(var(--p) * 1%); min-height: 4px; border-radius: 10px 10px 4px 4px; background: var(--glow); }
+.bar:last-child { color: var(--ink); }
+.bar .lbl { flex: none; height: 18px; line-height: 18px; }
+.ic { position: relative; }
+#ins [data-tip]::after { display: none; }
+.ic-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: none; }
+.ic-filters .field { width: auto; min-height: 32px; padding: 2px 10px; font-size: 14px; }
+.seg.sm { padding: 3px; gap: 2px; }
+.seg.sm button { min-height: 32px; padding: 0 12px; font-size: 14px; }
+.hrow { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; font-size: 14px; line-height: 1.25; }
+.ic-body:has(.hrow) { gap: 8px; }
+.meter { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--field); overflow: hidden; }
+.meter i { display: block; height: 100%; width: calc(var(--p) * 1%); background: var(--glow); }
+.miles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.chip { padding: 5px 4px; border-radius: 16px; border: 1px solid var(--glass-line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; font-size: 11px; line-height: 1.2; color: var(--muted); }
+.chip .tx { display: grid; }
+.chip b { font-size: 12px; font-weight: 600; color: var(--ink); }
+.chip .medal { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--glass-line); opacity: .55; }
+.chip .medal svg { width: 16px; height: 16px; }
+.chip[data-got] .medal { opacity: 1; background: rgba(255,255,255,.4); border-color: transparent; box-shadow: 0 0 0 3px rgba(255,255,255,.25); }
+.chip[data-got] .medal svg { stroke-width: 2; }
+.chip[data-got] { background: var(--glow); border-color: transparent; color: #2A2440; }
+.chip[data-got] b { color: #2A2440; }
+dialog { color: var(--ink); width: min(448px, calc(100% - 32px)); margin: auto auto 16px; }
+/* dialog.glass: must outrank .glass, which sets its own transition */
+dialog.glass { opacity: 0; transform: translateY(16px); transition: opacity .2s ease-out, transform .28s var(--ease), display .2s allow-discrete, overlay .2s allow-discrete, background-color .6s ease, border-color .6s ease; }
+dialog.glass[open] { opacity: 1; transform: none; }
+dialog::backdrop { background: rgb(10 8 30 / .35); opacity: 0; transition: opacity .2s ease-out, display .2s allow-discrete, overlay .2s allow-discrete; }
+dialog[open]::backdrop { opacity: 1; }
+@starting-style { dialog.glass[open] { opacity: 0; transform: translateY(16px); } dialog[open]::backdrop { opacity: 0; } }
+dialog dt { font-family: var(--serif); font-style: italic; font-size: 18px; margin-top: 16px; }
+dialog dd { margin: 4px 0 0; color: var(--muted); }
+
+/* ---------- manage habits ---------- */
+.manage { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.manage li { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; min-height: 52px; }
+.manage .name { flex: 1 1 140px; padding-left: 4px; }
+.manage .field { flex: 1 1 140px; width: auto; }
+.mini { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; }
+.mini:hover { background: var(--field); }
+.grip { cursor: grab; touch-action: none; color: var(--muted); }
+.manage li { border-radius: 14px; transition: background-color .2s ease, box-shadow .2s ease; }
+.manage li.dragging { background: var(--solid); box-shadow: var(--shadow); }
+.manage li.dragging .grip { cursor: grabbing; }
+.arch-h { margin-top: 20px; }
+.manage.arch .name { color: var(--muted); }
+.manage.arch .ask { flex: 1 1 140px; padding-left: 4px; }
+.manage.arch .danger { color: var(--bad, #C0392B); }
+.add { display: flex; gap: 8px; }
+.add .field { flex: 1; width: auto; min-width: 0; }
+.btn.round { width: 48px; padding: 0; display: grid; place-items: center; flex: none; }
+
+/* ---------- navigation: bottom pill on phones ---------- */
+.nav { position: fixed; z-index: 2; left: 0; right: 0; width: max-content; margin-inline: auto; bottom: max(16px, env(safe-area-inset-bottom)); }
+.brand { font-size: 28px; letter-spacing: -.01em; background: none; border: 0; padding: 0; min-height: 44px; color: var(--ink); text-align: left; }
+/* phones: no room for the brand next to the page header, so it appears only in scene mode */
+@media (max-width: 699px) {
+  .brand { position: fixed; top: 12px; left: 20px; opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s .4s; }
+  .viewing .brand { opacity: 1; visibility: visible; transition-delay: .1s; }
+}
+.tabs { position: relative; display: flex; gap: 4px; padding: 6px; border-radius: 999px; }
+.tabs button { position: relative; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: transparent; font-weight: 500; }
+.tabs button[aria-current="page"] { color: var(--btn-ink); }
+/* one pill that slides to the current tab */
+.ind { position: absolute; left: 0; top: 0; border-radius: 999px; background: var(--btn-bg); }
+.ready .ind { transition: transform .35s var(--ease), width .35s var(--ease), height .35s var(--ease); }
+::view-transition-group(*) { animation-duration: .28s; animation-timing-function: var(--ease); }
+.tabs .wide-only { display: none; }
+
+.signin { min-height: calc(100dvh - 160px); align-content: center; }
+
+/* ---------- tablet: top bar, two columns ---------- */
+@media (min-width: 700px) {
+  :root { --orb-size: 132px; }
+  html[data-phase="night"] { --orb-size: 76px; }
+  /* tablet: the orb never rises into the top bar */ .orb { right: 7vw; top: max(var(--orb-y), 104px); }
+  /* the scene fills the screen, not just the top band; cards float over it and "View scene" clears them */
+  .bgwrap .layer img { height: 100%; -webkit-mask-image: linear-gradient(#000 85%, transparent); mask-image: linear-gradient(#000 85%, transparent); }
+  .bgwrap .scrim { height: 100%; background: linear-gradient(rgb(10 8 30 / .35), transparent 25%, transparent 65%, rgb(10 8 30 / .5)); }
+  .view { right: 24px; bottom: 24px; }
+  .ins { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .app { max-width: 960px; padding: 16px 32px 64px; }
+  .nav { position: static; width: auto; max-width: 960px; margin: 0 auto; padding: 24px 32px 0; display: flex; align-items: center; justify-content: space-between; }
+  .tabs .wide-only { display: block; }
+  .gear { display: none; }
+  .today { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+  .history { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+  .today, .history { column-gap: 24px; align-items: start; }
+  .today > .head, .today > #closing, .history > .head { grid-column: 1 / -1; }
+  /* journal on the left, habits on the right */
+  .today > .head { grid-row: 1; } .today > #reflection { grid-column: 1; grid-row: 2; } .today > .col { grid-column: 2; grid-row: 2; } .today > #closing { grid-row: 3; }
+  .narrow { max-width: 560px; }
+  /* card and title stay left so the sun and horizon on the right are never covered */
+  .signin { grid-template-columns: minmax(0, 420px) 1fr; }
+  .signin > * { grid-column: 1; }
+  .signin h1 { font-size: clamp(48px, 6vw, 76px); }
+  /* the day sheet becomes a panel beside the grid */
+  dialog { position: static; width: auto; margin: 0; }
+  #sheet-close { display: none; }
+}
+/* App shell: the page never scrolls. Header stays put; only a card's own content scrolls. */
+@media (min-width: 700px) {
+  html:not(.out) body { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+  html:not(.out) .app { flex: 1; min-height: 0; width: 100%; padding-bottom: 24px; display: flex; flex-direction: column; }
+  html:not(.out) .screen:not(.signin) { flex: 1; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+  .today:not(.signin) { grid-template-rows: auto minmax(0, 1fr) auto !important; }
+  .screen:not(.signin) > .head { position: static; padding: 12px 20px; }
+  .screen:not(.signin) > .head h1 { font-size: clamp(28px, 1.2vw + 20px, 36px); }
+  .screen:not(.signin) > :not(.head):not(dialog):not(#closing) { min-height: 0; max-height: 100%; overflow: auto; align-self: start; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
+  .today > .col { overflow: visible; display: flex; flex-direction: column; gap: 16px; }
+  .today > .col > .glass { min-height: 0; flex: 0 1 auto; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
+  .today > .col > .cheer { flex: none; }
+  /* journal card fills the column; the three fields share what is left, so nothing needs scrolling on a normal screen */
+  .today > #reflection { display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
+  #reflection > .ed { flex: none; }
+  /* header (title, quote, save/cancel) never scrolls; only the fields area does */
+  .screen:not(.signin) > #reflection:not(.head):not(dialog):not(#closing), .screen:not(.signin) > .col:not(.head):not(dialog):not(#closing) { overflow: visible; }
+  #reflection .rbody { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; display: grid; gap: 14px; align-content: start; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
+  .today > .col > .glass { display: flex; flex-direction: column; overflow: visible; }
+  .today > .col > .glass > .habits { flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
+  #reflection .rte { height: auto; min-height: clamp(52px, 7.6dvh, 84px); padding-block: 8px; }
+  #reflection .rte[data-size="s"] { min-height: clamp(44px, 6dvh, 60px); }
+  /* every field: at most 7 lines (8px padding + 1px border each side), then it scrolls inside */
+  #reflection .rte { max-height: calc(7 * 1.5em + 18px); }
+  #reflection .ed.open .rte { max-height: none; }
+  #reflection .said { padding-bottom: 12px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  #reflection .said .prompt { font: 400 16px/1.4 var(--sans); margin: 0; }
+  #mood-desc:empty { display: none; }
+  #reflection .row { margin-top: auto; }
+  .screen:not(.signin) > .ins:not([hidden]) { align-self: stretch !important; overflow: hidden !important; grid-template-rows: minmax(0, 1.12fr) minmax(0, 1fr); }
+  .ins .stat b { font-size: 28px; }
+  .ins .ic .prompt { font-size: 16px; }
+  #sheet[open] { max-height: 100%; overflow: auto; align-self: start; }
+}
+@media (max-width: 699px) {
+  .tabs.glass { padding: 6px; }
+  .screen:not(.signin) > .head { position: sticky; top: 0; margin: 0 -16px; padding: 14px 20px 12px; background: rgb(12 10 32 / .38); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); mask-image: linear-gradient(#000 78%, transparent); -webkit-mask-image: linear-gradient(#000 78%, transparent); }
+  [data-theme="classic"][data-phase="day"] .screen:not(.signin) > .head { background: rgb(255 255 255 / .32); }
+  .ic-body:not(.hscroll) { max-height: 240px; }
+  .chart { min-height: 150px; }
+}
+/* text on the sky stays left of the orb on phones */
+#closing { padding: 8px 88px 8px 4px; }
+@media (min-width: 700px) { #closing { text-align: center; padding: 8px 0; } }
+
+/* ---------- desktop: side rail ---------- */
+@media (min-width: 1100px) {
+  html:not(.out) body { padding-left: 232px; }
+  .nav { position: fixed; inset: 0 auto 0 0; width: 232px; max-width: none; margin: 0; padding: 40px 24px 32px; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 40px; }
+  .brand { padding-left: 16px; }
+  .tabs.glass { flex: 1; flex-direction: column; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .tabs button { text-align: left; padding: 0 16px; }
+  .tabs .wide-only { margin-top: auto; }
+  .orb { right: 24px; top: var(--orb-y); }
+  .app { max-width: 1080px; margin: 0; padding: 32px 56px 64px; }
+  .today, .history { column-gap: 32px; }
+  .ins { gap: 32px; }
+  .signin { max-width: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .icon-btn { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--solid); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="bgwrap" aria-hidden="true"><div class="layer s-dawn"><img src="scenes/dawn.svg" alt=""></div><div class="layer s-day"><img src="scenes/day.svg" alt=""></div><div class="layer s-dusk"><img src="scenes/dusk.svg" alt=""></div><div class="layer s-night"><img src="scenes/night.svg" alt=""></div><div class="scrim"></div></div>
+<div class="sky" aria-hidden="true"><div class="stars"></div><div class="orb"></div><div class="blob"></div></div>
+
+<nav class="nav" id="nav" aria-label="Main">
+  <button class="brand" id="brand" type="button" aria-pressed="false" aria-label="Jurnala. Show today's quote over the scene">Jurnala</button>
+  <div class="tabs glass">
+    <span class="ind" hidden></span>
+    <button data-go="today" aria-current="page">Today</button>
+    <button data-go="history">History</button>
+    <button data-go="habits">Habits</button>
+    <button data-go="settings" class="wide-only">Settings</button>
+  </div>
+</nav>
+
+<button class="icon-btn view" id="view-scene" type="button" aria-pressed="false" aria-label="View scene">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+
+<main class="app">
+  <div class="quote" id="quote" role="status"><p></p></div>
+
+  <!-- 1. Sign in -->
+  <section class="screen signin" data-screen="signin" hidden>
+    <div class="head"><h1>Welcome to Jurnala</h1></div>
+    <form class="glass stack" id="signin-form">
+      <label>Email <input class="field" type="email" autocomplete="username" value="dwi@example.com" required></label>
+      <label>Password <input class="field" type="password" autocomplete="current-password" value="mockup-only" required></label>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <!-- 2. Today -->
+  <section class="screen today" data-screen="today">
+    <div class="head">
+      <div>
+        <h1 id="greeting">Good evening, Dwi</h1>
+        <p class="muted" id="date"></p>
+        <button class="btn text" id="back-today" type="button" hidden>Back to today</button>
+      </div>
+      <button class="icon-btn gear" data-go="settings" aria-label="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+
+    <div class="col">
+      <div class="glass stack">
+        <h2>Today's habits</h2>
+        <ul class="habits" id="habits"></ul>
+      </div>
+      <p class="prompt cheer" id="cheer" role="status" hidden></p>
+    </div>
+
+    <form class="glass stack" id="reflection">
+      <h2>Today's reflection</h2>
+      <div class="said">
+        <p class="muted small">Yesterday you said</p>
+        <p class="prompt">Call Mum before dinner.</p>
+      </div>
+      <div class="rbody">
+      <fieldset class="moods">
+        <legend class="prompt">How did today feel?</legend>
+        <div class="scale" id="moods"></div>
+        <p class="muted small" id="mood-desc" role="status"></p>
+      </fieldset>
+      <div class="ed"><div class="ed-top"><span class="prompt" id="q1">What went well today?</span></div>
+        <div class="field rte" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="q1" data-ph="A few words are enough." ></div></div>
+      <div class="ed"><div class="ed-top"><span class="prompt" id="q2">What was hard today?</span></div>
+        <div class="field rte" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="q2" data-ph="Write it down, then let it go." ></div></div>
+      <div class="ed"><div class="ed-top"><span class="prompt" id="q3">What's one thing for tomorrow?</span></div>
+        <div class="field rte" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="q3" data-ph="Keep it small." data-size="s"></div></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="rf-btn" type="submit">Save</button>
+        <button class="btn quiet" id="rf-cancel" type="button" hidden>Cancel</button>
+        <p class="muted" id="saved" role="status"></p>
+      </div>
+    </form>
+
+    <p class="prompt" id="closing" hidden>That's today. See you tomorrow.</p>
+  </section>
+
+  <!-- 3. History -->
+  <section class="screen history" data-screen="history" hidden>
+    <div class="head">
+      <div><h1>History</h1><p class="muted" id="hist-sub">Every day since you joined</p></div>
+      <div class="seg" role="group" aria-label="View" data-on="cal">
+        <button type="button" data-view="cal" aria-pressed="true">Calendar</button>
+        <button type="button" data-view="ins" aria-pressed="false">Insights</button>
+      </div>
+    </div>
+    <div class="glass stack" id="cal">
+      <div class="cal-head">
+        <button class="icon-btn" id="prev" type="button" aria-label="Previous month"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="cal-title" id="cal-title" type="button" aria-expanded="false" aria-controls="picker" aria-live="polite"></button>
+        <button class="icon-btn" id="next" type="button" aria-label="Next month"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+      <div class="picker" id="picker" hidden>
+        <div class="years">
+          <button class="icon-btn" id="py-prev" type="button" aria-label="Previous year"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <span id="py" aria-live="polite"></span>
+          <button class="icon-btn" id="py-next" type="button" aria-label="Next year"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="months" id="months"></div>
+        <label>Go to a date <input class="field" type="date" id="jump"></label>
+      </div>
+      <div class="stack" id="cal-body">
+        <div class="grid" id="grid"></div>
+        <div class="legend" id="legend"></div>
+        <button class="btn text" id="cal-today" type="button" hidden>Back to this month</button>
+      </div>
+    </div>
+    <dialog class="glass" id="sheet" aria-labelledby="sheet-date">
+      <h2 id="sheet-date"></h2>
+      <p class="muted" id="sheet-sub"></p>
+      <dl id="sheet-body"></dl>
+      <div class="row" style="margin-top:20px">
+        <button class="btn" id="sheet-edit">Edit this day</button>
+        <button class="btn quiet" id="sheet-close">Close</button>
+      </div>
+    </dialog>
+    <div class="ins" id="ins" hidden></div>
+  </section>
+
+  <!-- 4. Habits -->
+  <section class="screen narrow" data-screen="habits" hidden>
+    <div class="head"><div><h1>Habits</h1><p class="muted">Small things, done daily</p></div></div>
+    <div class="glass stack">
+      <h2>Your habits</h2>
+      <ul class="manage" id="manage"></ul>
+      <p class="muted" id="empty" hidden>Start with one small thing.</p>
+      <form class="add" id="add-form">
+        <input class="field" id="add-name" maxlength="60" placeholder="New habit" aria-label="New habit name" required>
+        <button class="btn round" type="submit" data-tip="Add habit" aria-label="Add habit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      </form>
+      <p class="muted small" id="habit-msg" role="status" hidden></p>
+      <div id="arch-wrap" hidden>
+        <h2 class="arch-h">Archived</h2>
+        <p class="muted small">Hidden from Today. Their past check-ins stay in History and the CSV.</p>
+        <ul class="manage arch" id="arch"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Settings -->
+  <section class="screen narrow" data-screen="settings" hidden>
+    <div class="head"><div><h1>Settings</h1><p class="muted">dwi@example.com</p></div></div>
+    <div class="glass stack">
+      <h2>Appearance</h2>
+      <div class="settings-row">
+        <span id="bg-label">Background</span>
+        <div class="seg" role="group" aria-labelledby="bg-label" id="theme-seg">
+          <button type="button" data-theme-set="scenes" aria-pressed="true">Scenes</button>
+          <button type="button" data-theme-set="classic" aria-pressed="false">Classic</button>
+        </div>
+      </div>
+      <label class="settings-row">Preview time of day
+        <select class="field" id="phase">
+          <option value="auto">Auto (your clock)</option>
+          <option value="dawn">Dawn 05–09</option>
+          <option value="day">Day 09–16</option>
+          <option value="dusk" selected>Dusk 16–19</option>
+          <option value="night">Night 19–05</option>
+        </select>
+      </label>
+      <hr>
+      <div>
+        <h2>Your data</h2>
+        <p class="muted small">One CSV file, one row per day: date, mood, the three reflection answers, and a 1 or 0 for each habit. Archived habits are included.</p>
+      </div>
+      <button class="btn quiet" type="button" id="export">Export my data (CSV)</button>
+      <hr>
+      <button class="btn quiet" type="button" data-go="signin">Sign out</button>
+    </div>
+  </section>
+</main>
+
+<script>
+// Mockup only: sample data, no server. Production code lives in src/ (see docs/plan.md).
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => s.replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`);
+const root = document.documentElement;
+const wide = matchMedia('(min-width: 700px)');
+const calm = matchMedia('(prefers-reduced-motion: reduce)');
+// animate list changes where the browser can; otherwise just apply them
+// FLIP for the habit lists: every row and block glides from where it was to where it is now; new ones fade in.
+// No page-wide view transition, so nothing else on screen cross-fades.
+const flip = fn => {
+  if (calm.matches) return fn();
+  const sel = '#manage li[data-id],#arch li[data-id],#add-form,#arch-wrap', key = e => e.dataset.id || e.id, live = () => $$(sel).filter(e => !e.hidden);
+  const from = new Map(live().map(e => [key(e), e.getBoundingClientRect()]));
+  fn();
+  live().forEach(e => {
+    const a = from.get(key(e)), b = e.getBoundingClientRect();
+    if (!a) return void e.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
+    if (a.left !== b.left || a.top !== b.top) e.animate([{ transform: `translate(${a.left - b.left}px,${a.top - b.top}px)` }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  });
+};
+const smooth = fn => document.startViewTransition && !calm.matches ? document.startViewTransition(fn) : fn();
+const MOODS = ['Rough', 'Low', 'Okay', 'Good', 'Great'];
+const MOOD_TIPS = ['A heavy day. Most things felt hard.', 'A bit down or drained. Not your best day.', 'Neither good nor bad. A plain, steady day.', 'A good day. More ups than downs.', 'A really good day. You felt light, proud, or happy.'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// localStorage can throw (private windows), so the app must work without it
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+// Same drawings as design/mood/*.svg, with the fill taken from --c so the colour tokens stay the single source.
+const FACES = [
+  '<circle cx="24" cy="24" r="22" fill="var(--c)"/><g stroke="#2A2440" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 19l7-3M35 19l-7-3"/><circle cx="17" cy="21" r="1.6" fill="#2A2440" stroke="none"/><circle cx="31" cy="21" r="1.6" fill="#2A2440" stroke="none"/><path d="M17 34q7-7 14 0"/></g>',
+  '<circle cx="24" cy="24" r="22" fill="var(--c)"/><g stroke="#2A2440" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="21" r="1.6" fill="#2A2440" stroke="none"/><circle cx="31" cy="21" r="1.6" fill="#2A2440" stroke="none"/><path d="M18 32q6-4 12 0"/></g>',
+  '<circle cx="24" cy="24" r="22" fill="var(--c)"/><g stroke="#2A2440" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="21" r="1.6" fill="#2A2440" stroke="none"/><circle cx="31" cy="21" r="1.6" fill="#2A2440" stroke="none"/><path d="M18 31h12"/></g>',
+  '<circle cx="24" cy="24" r="22" fill="var(--c)"/><g stroke="#2A2440" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="21" r="1.6" fill="#2A2440" stroke="none"/><circle cx="31" cy="21" r="1.6" fill="#2A2440" stroke="none"/><path d="M16 29q8 8 16 0"/></g>',
+  '<circle cx="24" cy="24" r="22" fill="var(--c)"/><g stroke="#2A2440" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 22q4-6 8 0M27 22q4-6 8 0"/><path d="M15 28q9 12 18 0z" fill="#2A2440"/></g>'
+];
+
+const CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2A2440" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const ICON = d => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const GRIP = ICON('<circle cx="9" cy="6" r="1" fill="currentColor"/><circle cx="15" cy="6" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="18" r="1" fill="currentColor"/><circle cx="15" cy="18" r="1" fill="currentColor"/>');
+const PENCIL = ICON('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>');
+const RESTORE = ICON('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>');
+const TRASH = ICON('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>');
+const ARCHIVE = ICON('<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11h14V8M10 12h4"/>');
+const TICK = ICON('<path d="M5 12.5l4.5 4.5L19 7.5"/>'), CROSS = ICON('<path d="M6 6l12 12M18 6L6 18"/>');
+// Icon-only buttons: the label shows on hover/focus (data-tip) and is the aria-label.
+const IB = (el, svg, label) => { el.innerHTML = svg; el.dataset.tip = label; el.setAttribute('aria-label', label); el.classList.remove('text'); el.classList.add('ib'); };
+IB($('#rf-btn'), TICK, 'Save reflection');
+IB($('#rf-cancel'), CROSS, 'Cancel changes');
+IB($('#sheet-edit'), PENCIL, 'Edit this day');
+IB($('#sheet-close'), CROSS, 'Close');
+IB($('#back-today'), ICON('<path d="M15 6l-6 6 6 6"/>'), 'Back to today');
+IB($('#cal-today'), ICON('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'), 'Back to this month');
+// One line per day, same for everyone, picked by the date. Calm, never blaming.
+const QUOTES = ['Small steps still move you forward.', 'You do not have to do it all today.', 'Begin again, as many times as you need.', 'Rest is part of the work.', 'Be as kind to yourself as you are to others.', 'Progress is quiet. Keep showing up.', 'One honest line is enough.', 'Today is a fresh page.', 'Slow is still going somewhere.', 'You are allowed to start small.', 'A good day is made of ordinary things.', 'Notice what went well. Start there.', 'You showed up. That counts.', 'Let the hard days be hard, then let them go.', 'Tomorrow does not need you to be perfect.', 'Breathe first. Then the next small thing.', 'What you repeat, you become.', 'Look up. The sky is doing its best.', 'Your pace is the right pace.', 'Gentle and steady wins the long game.', 'Done is better than flawless.', 'Every day you try is a day that matters.', 'Be here for the small moments.', 'Let today be enough.', 'Courage is just one more try.', 'Take what you need from today.', 'You have come further than you think.', 'Quiet effort adds up.', 'Choose the next kind thing for yourself.', 'The view is better when you pause.'];
+const quoteOfDay = () => { const n = new Date(); return QUOTES[Math.floor(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) / 864e5) % QUOTES.length]; };
+const CHEVRON = d => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const longDate = d => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+const longDateY = d => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+let habits = [
+  { id: 1, name: 'Morning walk', streak: 12, done: true },
+  { id: 2, name: 'Read 10 pages', streak: 5, done: true },
+  { id: 3, name: 'No phone after 10 pm', streak: 0, done: false },
+  { id: 4, name: 'Stretch for 5 minutes', streak: 2, done: false },
+];
+let saved = false, renaming = -1, archived = null, shelf = [{ id: 9, name: 'Cold shower' }], asking = -1;
+
+// ----- sky phase and sun position -----
+const phaseFor = h => h < 5 ? 'night' : h < 9 ? 'dawn' : h < 16 ? 'day' : h < 19 ? 'dusk' : 'night';
+const greetFor = h => h >= 5 && h < 12 ? 'Good morning' : h >= 12 && h < 17 ? 'Good afternoon' : 'Good evening';
+const SAMPLE_HOUR = { dawn: 7, day: 13, dusk: 18, night: 21 };
+let hour = 18;
+function setPhase(v) {
+  const now = new Date();
+  hour = v === 'auto' ? now.getHours() + now.getMinutes() / 60 : SAMPLE_HOUR[v];
+  root.dataset.phase = phaseFor(hour);
+  // sun rises 05, sets 19; the moon takes the night. Low at the ends, high in the middle.
+  const t = hour >= 5 && hour < 19 ? (hour - 5) / 14 : ((hour + 5) % 24) / 10;
+  root.style.setProperty('--orb-y', (6 + (1 - Math.sin(Math.PI * t)) * 26).toFixed(1) + '%');
+  showToday();
+}
+function showToday() {
+  $('#greeting').textContent = greetFor(hour) + ', Dwi';
+  $('#date').textContent = longDate(new Date());
+  $('#back-today').hidden = true;
+}
+function setTheme(v, animate) {
+  const apply = () => { root.dataset.theme = v; store.set('jurnala-theme', v);
+    $$('[data-theme-set]').forEach(b => b.setAttribute('aria-pressed', b.dataset.themeSet === v)); };
+  if (!animate || root.dataset.theme === v || !document.startViewTransition || calm.matches) return apply();
+  root.classList.toggle('wipe-l', v === 'scenes'); // Classic is the right-hand option: wipe left to right; back to Scenes: right to left
+  document.startViewTransition(apply);
+}
+$('#theme-seg').onclick = e => { const b = e.target.closest('[data-theme-set]'); if (b) setTheme(b.dataset.themeSet, true); };
+$('#phase').onchange = e => { store.set('jurnala-phase', e.target.value); setPhase(e.target.value); };
+// "View scene": hide every card so the landscape is the whole screen. Esc brings them back.
+// Cards fly to the current tab and back. Eye = just the scenery; brand = scenery plus the quote of the day.
+// Night sky: 220 stars from a seeded generator, so the pattern is the same on every load. Two layers twinkle out of step.
+{ let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, layers = [[], []];
+  for (let n = 0; n < 220; n++) layers[n % 2].push(`${(rnd() * 100).toFixed(1)}vw ${(rnd() * 100).toFixed(1)}vh 0 ${rnd() < .18 ? '.6px' : '0'} rgb(255 255 255 / ${(.35 + rnd() * .65).toFixed(2)})`);
+  $('.stars').innerHTML = '<i></i><i></i>'; $$('.stars i').forEach((el, k) => el.style.boxShadow = layers[k].join(',')); }
+$('#quote p').textContent = quoteOfDay();
+const inScene = () => root.classList.contains('viewing');
+const cards = () => [...($('.screen:not([hidden])')?.children || [])].filter(el => el.getClientRects().length);
+const curTab = () => [...$$(`[data-go="${$('.screen:not([hidden])')?.dataset.screen}"]`)].find(b => b.offsetParent);
+const toTab = el => {
+  const t = curTab().getBoundingClientRect(), r = el.getBoundingClientRect();
+  return `translate(${t.left + t.width / 2 - r.left - r.width / 2}px, ${t.top + t.height / 2 - r.top - r.height / 2}px) scale(.12)`;
+};
+async function fly(out) {
+  const els = cards(), tab = curTab();
+  if (calm.matches || !els.length || !tab) return [];
+  const anims = els.map((el, i) => { const gone = { transform: toTab(el), opacity: 0 }, here = { transform: 'none', opacity: 1 };
+    return el.animate(out ? [here, gone] : [gone, here], { duration: out ? 500 : 800, delay: i * (out ? 60 : 80), easing: out ? 'cubic-bezier(.5,0,.75,.2)' : 'cubic-bezier(.22,1,.36,1)', fill: out ? 'forwards' : 'backwards' }); });
+  await Promise.all(anims.map(a => a.finished.catch(() => {})));
+  return anims;
+}
+// The tab pill follows the screen, except while the brand quote is showing (no tab selected then).
+const markTab = on => { $$('#nav button').forEach(b => b.removeAttribute('aria-current'));
+  const t = on && $(`#nav [data-go="${$('.screen:not([hidden])')?.dataset.screen}"]`); if (t) t.setAttribute('aria-current', 'page'); moveInd(); };
+let busy = false;
+async function scene(on, quote) {
+  if (busy || on === inScene()) return;
+  busy = true; $('#view-scene').setAttribute('aria-pressed', on);
+  if (on) { const a = await fly(true); root.classList.add('viewing'); root.classList.toggle('q', !!quote); markTab(!quote); a.forEach(x => x.cancel()); }
+  else { root.classList.remove('viewing', 'q'); markTab(true); await fly(false); }
+  $('#brand').setAttribute('aria-pressed', root.classList.contains('q'));
+  busy = false;
+}
+$('#view-scene').onclick = () => scene(!inScene());
+$('#brand').onclick = () => {
+  if (busy) return;
+  if (!inScene()) scene(true, true);
+  else if (!root.classList.contains('q')) root.classList.add('q'), markTab(false), $('#brand').setAttribute('aria-pressed', 'true');
+};
+addEventListener('keydown', e => { if (e.key === 'Escape' && inScene()) scene(false); });
+$('#back-today').onclick = showToday;
+
+// ----- navigation -----
+function moveInd() {
+  const b = $('#nav [aria-current]'), ind = $('.ind');
+  ind.hidden = !b || !b.offsetParent; if (ind.hidden) return;
+  Object.assign(ind.style, { width: b.offsetWidth + 'px', height: b.offsetHeight + 'px', transform: `translate(${b.offsetLeft}px, ${b.offsetTop}px)` });
+}
+addEventListener('resize', moveInd);
+document.fonts.ready.then(() => { moveInd(); requestAnimationFrame(() => $('#nav').classList.add('ready')); });
+function go(name) {
+  $$('.screen').forEach(s => s.hidden = s.dataset.screen !== name);
+  $('#nav').hidden = name === 'signin';
+  root.classList.toggle('out', name === 'signin');
+  $$('#nav button').forEach(b => b.toggleAttribute('aria-current', false));
+  const tab = $(`#nav [data-go="${name}"]`);
+  if (tab) tab.setAttribute('aria-current', 'page');
+  moveInd();
+  const wasScene = inScene();
+  root.classList.remove('viewing', 'q'); $('#view-scene').setAttribute('aria-pressed', 'false'); $('#brand').setAttribute('aria-pressed', 'false');
+  if (name === 'history' && wide.matches && !$('#sheet').open && !$('#sheet').hidden) ($('.day[aria-pressed="true"]') || $('.day[aria-current="date"]'))?.click();
+  scrollTo(0, 0);
+  if (wasScene) fly(false);
+}
+// Another tab: the current cards fly into their tab, then the new ones fly out of theirs.
+async function switchTo(name) {
+  if (busy) return;
+  const cur = $('.screen:not([hidden])')?.dataset.screen;
+  if (name === 'signin' && cur !== 'signin') return signOut();
+  if (!cur || cur === 'signin' || inScene() || calm.matches) { go(name); return; }
+  busy = true;
+  const a = await fly(true); go(name); a.forEach(x => x.cancel());
+  await fly(false); busy = false;
+}
+// Sign out: the cards and the nav sink and fade, then the sign-in card rises in a beat after its title.
+async function signOut() {
+  if (calm.matches || busy) return go('signin');
+  busy = true;
+  const out = [...$$('.screen:not([hidden]) > :not(dialog)'), $('#nav'), $('#view-scene')].filter(e => e && !e.hidden);
+  const k = [{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(14px) scale(.98)', filter: 'blur(4px)' }];
+  await Promise.all(out.map((e, i) => e.animate(k, { duration: 280, delay: i * 40, easing: 'cubic-bezier(.4,0,.8,.4)', fill: 'forwards' }).finished));
+  go('signin'); out.forEach(e => e.getAnimations().forEach(x => x.cancel()));
+  $('#signin-form').animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], { duration: 480, delay: 120, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' });
+  busy = false;
+}
+// Same tab again = minimize its cards into the tab; again = bring them back. Another tab = open that one.
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]'); if (!b) return;
+  if (b.dataset.go === $('.screen:not([hidden])')?.dataset.screen && b.dataset.go !== 'signin') scene(!inScene());
+  else switchTo(b.dataset.go);
+});
+$('#signin-form').onsubmit = e => { e.preventDefault(); go('today'); };
+
+// ----- today -----
+function closing() { $('#closing').hidden = !(saved && habits.length && habits.every(h => h.done)); }
+function renderHabits() {
+  $('#habits').innerHTML = habits.map((h, i) => `
+    <li><button class="habit" type="button" aria-pressed="${h.done}" data-i="${i}">
+      <span class="tick">${CHECK}</span><span class="name">${esc(h.name)}</span>
+      <span class="streak muted small">${h.streak ? h.streak + '-day streak' : ''}</span>
+    </button></li>`).join('');
+  $('#manage').innerHTML = habits.map((h, i) => i === renaming ? `
+    <li style="view-transition-name:h${h.id}"><input class="field" id="rename" maxlength="60" value="${esc(h.name)}" aria-label="Habit name">
+      <button class="mini" data-save="${i}" data-tip="Save name" aria-label="Save name">${TICK}</button>
+      <button class="mini" data-cancel data-tip="Cancel" aria-label="Cancel rename">${CROSS}</button></li>` : `
+    <li data-id="${h.id}" style="view-transition-name:h${h.id}">
+      <button class="mini grip" type="button" data-grip="${i}" data-tip="Drag to reorder" aria-label="Reorder ${esc(h.name)}. Drag, or press the up and down arrow keys.">${GRIP}</button>
+      <span class="name">${esc(h.name)}</span>
+      <button class="mini" data-rename="${i}" data-tip="Rename" aria-label="Rename ${esc(h.name)}">${PENCIL}</button>
+      <button class="mini" data-archive="${i}" data-tip="Archive" aria-label="Archive ${esc(h.name)}">${ARCHIVE}</button></li>`).join('');
+  $('#arch-wrap').hidden = !shelf.length;
+  $('#arch').innerHTML = shelf.map((h, i) => i === asking ? `
+    <li data-id="${h.id}"><span class="ask">Delete "${esc(h.name)}" and all its check-ins? This cannot be undone.</span>
+      <button class="mini danger" data-del="${i}" data-tip="Delete permanently" aria-label="Confirm: delete ${esc(h.name)} permanently">${TICK}</button>
+      <button class="mini" data-keep data-tip="Cancel" aria-label="Cancel delete">${CROSS}</button></li>` : `
+    <li data-id="${h.id}"><span class="name">${esc(h.name)}</span>
+      <button class="mini" data-restore="${i}" data-tip="Restore" aria-label="Restore ${esc(h.name)}">${RESTORE}</button>
+      <button class="mini danger" data-ask="${i}" data-tip="Delete permanently" aria-label="Delete ${esc(h.name)} permanently">${TRASH}</button></li>`).join('');
+  $('#empty').hidden = habits.length > 0;
+  closing();
+}
+// Encouragement: one calm line, shown once per trigger, gone after 8 seconds. Never blames.
+const STREAK_MSG = { 3: "Three days in a row. It's becoming a habit.", 5: 'Five days straight. Keep going.', 7: "One full week. That's real.", 14: 'Two weeks of showing up.', 30: 'Thirty days. This is who you are now.' };
+const ALL_DONE = 'Every habit done. Rest well.', HARD_DAY = 'A hard day still counts. Be kind to yourself.';
+let cheerTimer, mood = 0;
+function cheer(t) {
+  const c = $('#cheer'); c.textContent = t || ''; c.hidden = !t;
+  clearTimeout(cheerTimer); if (t) cheerTimer = setTimeout(() => { c.hidden = true; }, 8000);
+}
+$('#habits').onclick = e => {
+  const b = e.target.closest('.habit'); if (!b) return;
+  const h = habits[b.dataset.i]; h.done = !h.done; h.streak += h.done ? 1 : -1;
+  cheer(h.done ? STREAK_MSG[h.streak] || (habits.every(x => x.done) ? ALL_DONE : '') : '');
+  b.setAttribute('aria-pressed', h.done); // updated in place: re-rendering would skip the tick animation
+  $('.streak', b).textContent = h.streak ? h.streak + '-day streak' : '';
+  closing();
+};
+$('#moods').innerHTML = MOODS.map((m, i) =>
+  `<div class="mw"><button class="mood" type="button" aria-pressed="false" aria-describedby="tip${i}" style="--c:var(--mood-${i + 1})"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">${FACES[i]}</svg>${m}</button><span class="tip" role="tooltip" id="tip${i}">${MOOD_TIPS[i]}</span></div>`).join('');
+$('#moods').onclick = e => {
+  const b = e.target.closest('.mood'); if (!b) return;
+  pickMood($$('.mood').indexOf(b) + 1);
+};
+// ----- rich editor: bold, italic, emoji, Enter = new line, expand into a centred panel -----
+// Mockup only: contenteditable + execCommand. The real app should store limited markdown, never raw HTML.
+const EMOJI = ['😊','😌','😔','😤','😴','🙏','❤️','🔥','☀️','🌧️','💪','🎉','✨','🌱','☕','📖'];
+const TOOL_ICON = {
+  b: '<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>',
+  i: '<path d="M19 4h-9M14 20H5M15 4 9 20"/>',
+  e: '<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9.5h.01M15 9.5h.01"/>',
+  x: '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
+  c: '<path d="M20 4l-6 6M14 10h6M14 10V4M4 20l6-6M10 14H4M10 14v6"/>'
+};
+const tool = (k, label, extra = '') => `<button class="tool" type="button" data-k="${k}" aria-label="${label}" data-tip="${label}" ${extra}>${ICON(TOOL_ICON[k])}</button>`;
+let openEd = null;
+$$('.ed').forEach(ed => {
+  ed.querySelector('.ed-top').insertAdjacentHTML('beforeend', `<div class="ed-tools"><div class="ed-fmt">${tool('b', 'Bold')}${tool('i', 'Italic')}${tool('e', 'Emoji', 'aria-expanded="false"')}</div>${tool('x', 'Expand')}</div>`);
+  ed.insertAdjacentHTML('beforeend', `<div class="emo" hidden>${EMOJI.map(m => `<button type="button" aria-label="${m}">${m}</button>`).join('')}</div>`);
+});
+// keep the selection inside the editor while a toolbar button is pressed
+document.addEventListener('mousedown', e => { if (e.target.closest('.ed .tool, .emo button')) e.preventDefault(); });
+// paste as plain text, so nothing foreign enters the journal
+document.addEventListener('paste', e => { const r = e.target.closest?.('.rte'); if (!r) return; e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
+// Typing "- ", "* " or "1. " at the start of a line turns it into a bullet / numbered list.
+document.addEventListener('beforeinput', e => {
+  const r = e.target.closest?.('.rte'); if (!r || e.data !== ' ' || e.inputType !== 'insertText') return;
+  const sel = getSelection(); if (!sel.isCollapsed || !sel.anchorNode || sel.anchorNode.parentElement.closest('li')) return;
+  let b = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement; b = b.closest('div') || r; if (!r.contains(b)) b = r;
+  const rg = document.createRange(); rg.selectNodeContents(b); rg.setEnd(sel.anchorNode, sel.anchorOffset);
+  const m = /^(?:([-*•])|(\d{1,3})\.)$/.exec(rg.toString()); if (!m) return;
+  e.preventDefault(); sel.removeAllRanges(); sel.addRange(rg); document.execCommand('delete');
+  document.execCommand(m[1] ? 'insertUnorderedList' : 'insertOrderedList');
+  if (m[2] && +m[2] > 1) getSelection().anchorNode.parentElement.closest('ol')?.setAttribute('start', m[2]);
+});
+const syncTools = () => $$('.ed').forEach(ed => { if (!ed.contains(document.activeElement)) return;
+  ed.querySelector('[data-k="b"]').setAttribute('aria-pressed', document.queryCommandState('bold'));
+  ed.querySelector('[data-k="i"]').setAttribute('aria-pressed', document.queryCommandState('italic')); });
+document.addEventListener('selectionchange', syncTools);
+const edRect = () => { const w = Math.min(720, innerWidth - 32), h = Math.min(innerHeight * .7, 560); return { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h }; };
+const px = r => ({ left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+function expand(ed, on) {
+  if (!!openEd === on) return;
+  const dur = calm.matches ? 0 : 380, ease = 'cubic-bezier(.22,1,.36,1)', rte = ed.querySelector('.rte');
+  if (on) {
+    const from = ed.getBoundingClientRect(), sp = Object.assign(document.createElement('div'), { className: 'ed-spacer' });
+    sp.style.height = from.height + 'px'; ed.before(sp); ed._sp = sp;
+    const dim = Object.assign(document.createElement('div'), { className: 'ed-dim' }); dim.onclick = () => expand(ed, false);
+    document.body.append(dim); ed._dim = dim; requestAnimationFrame(() => dim.classList.add('on'));
+    document.body.append(ed); ed.classList.add('open', 'glass'); openEd = ed;
+    const to = edRect(); Object.assign(ed.style, px(to));
+    ed.animate([px(from), px(to)], { duration: dur, easing: ease });
+    ed.querySelector('[data-k="x"]').innerHTML = ICON(TOOL_ICON.c); ed.querySelector('[data-k="x"]').setAttribute('aria-label', 'Collapse');
+    rte.focus();
+  } else {
+    const from = ed.getBoundingClientRect(), to = ed._sp.getBoundingClientRect();
+    ed._dim.classList.remove('on'); openEd = null;
+    const done = () => { ed.classList.remove('open', 'glass'); ed.removeAttribute('style'); ed._sp.replaceWith(ed); ed._dim.remove(); rte.focus(); };
+    ed.querySelector('[data-k="x"]').innerHTML = ICON(TOOL_ICON.x); ed.querySelector('[data-k="x"]').setAttribute('aria-label', 'Expand');
+    ed.animate([px(from), px(to)], { duration: dur, easing: ease }).onfinish = done;
+    if (!dur) done();
+  }
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('.ed .tool, .emo button'); if (!t) return;
+  const ed = t.closest('.ed'), rte = ed.querySelector('.rte'), emo = ed.querySelector('.emo');
+  if (t.closest('.emo')) { rte.focus(); document.execCommand('insertText', false, t.textContent); emo.hidden = true; return; }
+  const k = t.dataset.k;
+  if (k === 'x') expand(ed, !ed.classList.contains('open'));
+  else if (k === 'e') { emo.hidden = !emo.hidden; t.setAttribute('aria-expanded', !emo.hidden); }
+  else { rte.focus(); document.execCommand(k === 'b' ? 'bold' : 'italic'); syncTools(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && openEd) expand(openEd, false); });
+// Focus can nudge the card sideways (hidden overflow is still scrollable by script); snap back.
+$('#reflection .rbody').addEventListener('scroll', e => { if (e.target.scrollLeft) e.target.scrollLeft = 0; });
+// Save turns the card into read mode; Edit opens it again (Save changes + Cancel).
+let snap = null;
+const fields = () => $$('.rte');
+function setMode(read) {
+  const f = $('#reflection'); f.dataset.mode = read ? 'read' : 'edit';
+  fields().forEach(t => { t.contentEditable = !read; t.closest('.ed').classList.toggle('ro', read); }); $$('.mood').forEach(m => m.tabIndex = read ? -1 : 0);
+  IB($('#rf-btn'), read ? PENCIL : TICK, read ? 'Edit reflection' : saved ? 'Save changes' : 'Save reflection');
+  $('#rf-cancel').hidden = read || !saved; $('#saved').textContent = read ? 'Saved.' : '';
+}
+const pickMood = n => { mood = n; $$('.mood').forEach((m, i) => m.setAttribute('aria-pressed', i + 1 === n)); $('#mood-desc').textContent = n ? `${MOODS[n - 1]}: ${MOOD_TIPS[n - 1]}` : ''; };
+$('#reflection').onsubmit = e => {
+  e.preventDefault();
+  if ($('#reflection').dataset.mode === 'read') { snap = { v: fields().map(t => t.innerHTML), mood }; setMode(false); fields()[0].focus(); return; }
+  saved = true; setMode(true); if (mood && mood <= 2) cheer(HARD_DAY); closing();
+};
+$('#rf-cancel').onclick = () => { fields().forEach((t, i) => { t.innerHTML = snap.v[i]; }); pickMood(snap.mood); setMode(true); };
+
+// ----- habits -----
+function say(text, undo) {
+  const m = $('#habit-msg'); m.hidden = !text; m.textContent = text || '';
+  if (undo) { const b = Object.assign(document.createElement('button'), { className: 'btn text', textContent: 'Undo', onclick: undo }); m.append(' ', b); }
+}
+$('#manage').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset; if ('grip' in d) return;
+  let focus;
+  if (d.rename) renaming = +d.rename;
+  if ('cancel' in d) renaming = -1;
+  if (d.save) { const n = $('#rename').value.trim(); if (n) habits[d.save].name = n; renaming = -1; }
+  if (d.archive) {
+    archived = { i: +d.archive, h: habits.splice(+d.archive, 1)[0] };
+    shelf.push(archived.h);
+    say(`Archived "${archived.h.name}".`, () => { shelf.splice(shelf.indexOf(archived.h), 1); habits.splice(archived.i, 0, archived.h); say(''); smooth(renderHabits); });
+  }
+  if (d.rename) focus = '#rename';
+  const done = () => { renderHabits(); if (focus) $(focus).focus(); }; // keep keyboard focus on the row that moved
+  d.rename || 'cancel' in d || d.save ? done() : flip(done);
+};
+$('#arch').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return; const d = b.dataset;
+  if (d.ask) asking = +d.ask;
+  if ('keep' in d) asking = -1;
+  if (d.restore) {
+    if (habits.length >= 12) return say('You have 12 habits. Archive one to restore another.');
+    habits.push(shelf.splice(+d.restore, 1)[0]); say('');
+  }
+  if (d.del) {
+    const h = shelf.splice(+d.del, 1)[0], el = shelf.length ? b.closest('li') : $('#arch-wrap'); asking = -1; say(`Deleted "${h.name}" permanently.`);
+    if (calm.matches) return renderHabits();
+    // the row (or the whole Archived block, if it was the last) fades and folds shut; the rest follows it up
+    const px = el.offsetHeight + 'px'; el.style.overflow = 'hidden';
+    return void el.animate([{ opacity: 1, height: px, minHeight: px }, { opacity: 0, height: '0px', minHeight: '0px' }], { duration: 300, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished.then(() => { el.getAnimations().forEach(x => x.cancel()); el.style.overflow = ''; renderHabits(); });
+  }
+  flip(renderHabits);
+};
+// reorder: drag the grip (pointer events, so touch works), or focus it and press Arrow Up / Down
+let drag = null;
+$('#manage').addEventListener('pointerdown', e => {
+  const g = e.target.closest('.grip'); if (!g) return;
+  renaming = -1; drag = { li: g.closest('li') }; drag.li.classList.add('dragging'); g.setPointerCapture(e.pointerId);
+});
+$('#manage').addEventListener('pointermove', e => {
+  if (!drag) return;
+  const over = $$('#manage li').find(o => o !== drag.li && e.clientY > o.getBoundingClientRect().top && e.clientY < o.getBoundingClientRect().bottom);
+  if (over) over.parentNode.insertBefore(drag.li, drag.li.compareDocumentPosition(over) & Node.DOCUMENT_POSITION_FOLLOWING ? over.nextSibling : over);
+});
+const endDrag = () => {
+  if (!drag) return; drag = null;
+  const ids = $$('#manage li').map(l => +l.dataset.id);
+  habits.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); renderHabits();
+};
+$('#manage').addEventListener('pointerup', endDrag); $('#manage').addEventListener('pointercancel', endDrag);
+$('#manage').addEventListener('keydown', e => {
+  if (e.target.id === 'rename') { if (e.key === 'Enter') $('[data-save]').click(); if (e.key === 'Escape') $('[data-cancel]').click(); return; }
+  const g = e.target.closest('.grip'); if (!g || !/^Arrow(Up|Down)$/.test(e.key)) return;
+  e.preventDefault();
+  const i = +g.dataset.grip, j = i + (e.key === 'ArrowUp' ? -1 : 1); if (!habits[j]) return;
+  [habits[i], habits[j]] = [habits[j], habits[i]]; renaming = -1;
+  smooth(() => { renderHabits(); $(`[data-grip="${j}"]`).focus(); });
+});
+$('#add-form').onsubmit = e => {
+  e.preventDefault();
+  if (habits.length >= 12) return say('You have 12 habits. Archive one to add another.');
+  const name = $('#add-name').value.trim(); if (!name) return;
+  habits.push({ id: Date.now(), name, streak: 0, done: false });
+  $('#add-name').value = ''; say(''); smooth(renderHabits);
+};
+
+// ----- history: month calendar + insights -----
+// Sample data is made up from the date, so any month back to sign-up has something to look at.
+(function history() {
+  const DAY = 864e5, HABITS = 4, FILL = [4, 4, 3, 4, 2, 4, 4, 1, 4];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const signup = new Date(today); signup.setDate(signup.getDate() - 430); // sample: joined 14 months ago
+  const serial = d => Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY);
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const mi = (y, m) => y * 12 + m;
+  function sample(d) {
+    if (d < signup || d > today) return { mood: 0, done: 0 };
+    const n = serial(d), mood = n % 17 === 0 ? 0 : (n * 3) % 5 + 1;
+    return { mood, done: mood ? FILL[(n * 5 + Math.floor(n / 7) * 3) % 9] : 0 };
+  }
+  const first = mi(signup.getFullYear(), signup.getMonth()), last = mi(today.getFullYear(), today.getMonth());
+  let vy = today.getFullYear(), vm = today.getMonth(), py = vy, sel = null;
+  const sheet = $('#sheet');
+
+  function drawMonth() {
+    const lead = (new Date(vy, vm, 1).getDay() + 6) % 7, days = new Date(vy, vm + 1, 0).getDate();
+    let html = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span class="wd" aria-hidden="true">${d}</span>`).join('') + '<span></span>'.repeat(lead);
+    for (let i = 1; i <= days; i++) {
+      const d = new Date(vy, vm, i), { mood, done } = sample(d), pre = d < signup, future = d > today, full = done === HABITS;
+      const label = longDateY(d), key = iso(d);
+      html += `<button class="day" ${pre || future ? 'disabled' : ''} ${pre ? 'data-pre' : ''} ${future ? 'data-future' : ''} ${mood ? `data-mood="${mood}" style="--c:var(--mood-${mood})"` : ''} ${full ? 'data-full' : ''}
+        ${+d === +today ? 'aria-current="date"' : ''} ${key === sel ? 'aria-pressed="true"' : ''} data-key="${key}" data-label="${label}" data-done="${done}"
+        aria-label="${label}${pre ? ', before you joined' : mood ? ', ' + MOODS[mood - 1] + ', ' + done + ' of ' + HABITS + ' habits done' : future ? '' : ', no reflection'}"><i>${i}</i></button>`;
+    }
+    $('#grid').innerHTML = html;
+    $('#cal-title').innerHTML = `${new Date(vy, vm, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} ${CHEVRON('M6 9l6 6 6-6')}`;
+    $('#prev').disabled = mi(vy, vm) <= first; $('#next').disabled = mi(vy, vm) >= last;
+    $('#cal-today').hidden = mi(vy, vm) === last;
+  }
+  function drawPicker() {
+    $('#py').textContent = py;
+    $('#py-prev').disabled = py <= signup.getFullYear(); $('#py-next').disabled = py >= today.getFullYear();
+    $('#months').innerHTML = MONTHS.map((n, m) => `<button type="button" data-m="${m}" aria-pressed="${py === vy && m === vm}" ${mi(py, m) < first || mi(py, m) > last ? 'disabled' : ''}>${n}</button>`).join('');
+  }
+  function togglePicker(open) {
+    $('#picker').hidden = !open; $('#cal-body').hidden = open; $('#cal-title').setAttribute('aria-expanded', open);
+    if (open) { py = vy; drawPicker(); }
+  }
+  const step = n => { const t = mi(vy, vm) + n; vy = Math.floor(t / 12); vm = t % 12; drawMonth(); };
+  $('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);
+  $('#cal-today').onclick = () => { vy = today.getFullYear(); vm = today.getMonth(); drawMonth(); };
+  $('#cal-title').onclick = () => togglePicker($('#picker').hidden);
+  $('#py-prev').onclick = () => { py--; drawPicker(); }; $('#py-next').onclick = () => { py++; drawPicker(); };
+  $('#months').onclick = e => { const b = e.target.closest('[data-m]'); if (!b) return; vy = py; vm = +b.dataset.m; togglePicker(false); drawMonth(); };
+  $('#jump').min = iso(signup); $('#jump').max = iso(today);
+  $('#jump').onchange = e => {
+    const [y, m, d] = e.target.value.split('-').map(Number); if (!y) return;
+    vy = y; vm = m - 1; sel = e.target.value; togglePicker(false); drawMonth(); $(`.day[data-key="${sel}"]`)?.click();
+  };
+  $('#legend').innerHTML = MOODS.map((m, i) => `<span><i style="--c:var(--mood-${i + 1})"></i>${m}</span>`).join('')
+    + '<span><i class="dot"></i>Every habit done</span>';
+
+  $('#grid').onclick = e => {
+    const b = e.target.closest('.day'); if (!b) return;
+    const mood = +b.dataset.mood; sel = b.dataset.key;
+    $$('.day').forEach(x => x.toggleAttribute('aria-pressed', false));
+    b.setAttribute('aria-pressed', 'true');
+    $('#sheet-date').textContent = b.dataset.label;
+    $('#sheet-sub').textContent = mood ? `${MOODS[mood - 1]}. ${b.dataset.done === '4' ? 'Every habit done.' : `${b.dataset.done} of ${HABITS} habits done.`}` : 'Nothing saved for this day.';
+    $('#sheet-body').innerHTML = mood ? `
+      <dt>What went well today?</dt><dd>Finished the report early and had a long lunch outside.</dd>
+      <dt>What was hard today?</dt><dd>Kept reaching for my phone in the evening.</dd>
+      <dt>What's one thing for tomorrow?</dt><dd>Call Mum before dinner.</dd>` : '';
+    // panel beside the grid on wide screens, bottom sheet on phones
+    if (!wide.matches) { if (sheet.open) sheet.close(); sheet.showModal(); }
+    else if (!sheet.open) sheet.open = true; // not show(): it would pull focus off the grid
+    else if (!calm.matches) sheet.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+  };
+  $('#sheet-close').onclick = () => sheet.close();
+  $('#sheet-edit').onclick = () => {
+    sheet.close(); go('today');
+    $('#greeting').textContent = $('#sheet-date').textContent;
+    $('#date').textContent = 'You are editing a past day.';
+    $('#back-today').hidden = false;
+  };
+
+  // ----- insights: every number below is worked out in the browser from the history response -----
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const habitDone = (d, k) => sample(d).done > k;
+  function streaks(k) {
+    let best = 0, run = 0;
+    for (let d = new Date(signup); d <= today; d = add(d, 1)) { run = habitDone(d, k) ? run + 1 : 0; best = Math.max(best, run); }
+    let cur = 0, d = habitDone(today, k) ? today : add(today, -1); // an unticked today does not break the streak yet
+    while (d >= signup && habitDone(d, k)) { cur++; d = add(d, -1); }
+    return { best, cur };
+  }
+  function periodMessage(unit, ps) { // ps: percent per finished period, newest last
+    const n = ps.length; if (!n) return '';
+    let good = 0; while (good < n && ps[n - 1 - good] >= 80) good++;
+    if (ps[n - 1] === 100) return `A perfect ${unit}. Well earned.`;
+    if (good >= 4) return `Four ${unit}s of steady effort. Be proud of that.`;
+    if (good >= 2) return `Two good ${unit}s in a row. The pattern is forming.`;
+    if (good === 1) return `A good ${unit}. Keep it going.`;
+    return ps[n - 1] < 50 ? `A slow ${unit} happens. Don't lose heart. Tomorrow we build a better day.` : `A steady ${unit}. Every bit counts.`;
+  }
+  // Habits-over-time card: Day / Week / Month, inside one month (Day, Week) or one year (Month).
+  const gr = { y: today.getFullYear(), m: today.getMonth(), g: 'week' };
+  const span = (a, b) => { let done = 0, days = 0; for (let d = a < signup ? new Date(signup) : a; d <= b && d <= today; d = add(d, 1)) { done += sample(d).done; days++; } return { done, poss: days * HABITS }; };
+  const mon = (y, m, o) => new Date(y, m, 1).toLocaleDateString('en-GB', o);
+  function series() {
+    const out = [], { y, m, g } = gr;
+    if (g === 'day') for (let d = new Date(y, m, 1); d.getMonth() === m && d <= today; d = add(d, 1)) { if (d < signup) continue; out.push({ ...span(d, d), label: d.getDate(), tip: d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }), live: iso(d) === iso(today) }); }
+    if (g === 'week') for (let ws = add(new Date(y, m, 1), -((new Date(y, m, 1).getDay() + 6) % 7)); ws <= today; ws = add(ws, 7)) {
+      if (ws.getMonth() !== m || ws.getFullYear() !== y) continue; // a week belongs to the month of its Monday
+      const l = ws.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), s7 = span(ws, add(ws, 6));
+      if (s7.poss) out.push({ ...s7, label: l, tip: `Week of ${l}`, live: ws > add(today, -7) });
+    }
+    if (g === 'month') for (let k = 0; k < 12; k++) { const a = new Date(y, k, 1), z = new Date(y, k + 1, 0); if (z < signup || a > today) continue; out.push({ ...span(a, z), label: mon(y, k, { month: 'short' }), tip: mon(y, k, { month: 'long', year: 'numeric' }), live: y === today.getFullYear() && k === today.getMonth() }); }
+    return out.map(x => ({ ...x, p: pct(x.done, x.poss) }));
+  }
+  function drawBars() {
+    const ps = series(), g = gr.g, box = $('#wk'), cap = $('#wk-cap');
+    box.innerHTML = ps.map(w => `<div class="bar g-${g}" tabindex="0" data-tip="${w.tip}: ${w.done} of ${w.poss} habit check-ins done (${w.p}%).${w.live ? ' Still in progress.' : ''}"><span class="plot"><span class="fill" style="--p:${w.p}"></span></span><span class="lbl">${g !== 'day' || w.label === 1 || w.label % 5 === 0 || w.live ? w.label : ''}</span></div>`).join('');
+    cap.dataset.d = periodMessage(g, ps.filter(w => !w.live).map(w => w.p)) || `Habits done per ${g}.`; cap.textContent = cap.dataset.d;
+    $('#wk-p').innerHTML = g === 'month'
+      ? Array.from({ length: today.getFullYear() - signup.getFullYear() + 1 }, (_, i) => today.getFullYear() - i).map(y => `<option value="${y}"${y === gr.y ? ' selected' : ''}>${y}</option>`).join('')
+      : Array.from({ length: last - first + 1 }, (_, i) => last - i).map(k => `<option value="${Math.floor(k / 12)}-${k % 12}"${Math.floor(k / 12) === gr.y && k % 12 === gr.m ? ' selected' : ''}>${mon(Math.floor(k / 12), k % 12, { month: 'long', year: 'numeric' })}</option>`).join('');
+    $$('#wk-g button').forEach(b => b.setAttribute('aria-pressed', b.dataset.g === g));
+  }
+  function drawInsights() {
+    let entries = 0; for (let d = new Date(signup); d <= today; d = add(d, 1)) entries += sample(d).mood ? 1 : 0;
+    if (entries < 7) { $('#ins').innerHTML = '<div class="glass"><p>Insights appear after a week of entries.</p></div>'; return; }
+    // this month
+    const ms = new Date(today.getFullYear(), today.getMonth(), 1); let wrote = 0, sum = 0;
+    for (let d = ms; d <= today; d = add(d, 1)) { const m = sample(d).mood; if (m) { wrote++; sum += m; } }
+    const per = habits.map((h, k) => ({ name: h.name, ...streaks(k) }));
+    const bestStreak = Math.max(...per.map(p => p.best)), curStreak = Math.max(...per.map(p => p.cur));
+    const bestBest = per.find(p => p.best === bestStreak), curBest = per.find(p => p.cur === curStreak);
+    // best weekday over the last 12 weeks
+    const dow = Array.from({ length: 7 }, () => [0, 0]);
+    for (let i = 0; i < 84; i++) { const d = add(today, -i), wd = (d.getDay() + 6) % 7; dow[wd][0] += sample(d).done; dow[wd][1] += HABITS; }
+    const bestDay = dow.map((x, i) => [x[0] / x[1], i]).sort((a, b) => b[0] - a[0])[0][1];
+    const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][bestDay];
+    const last30 = k => { let n = 0; for (let i = 0; i < 30; i++) n += habitDone(add(today, -i), k) ? 1 : 0; return pct(n, 30); };
+    const MILES = [7, 14, 30, 60, 100, 180, 365];
+    const MEDAL = { 7: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>', 14: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.2 1 2 2 2-.5-3 0-6 1-8z"/>', 30: '<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>', 60: '<path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>', 100: '<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M10 18h4"/>', 180: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>', 365: '<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l-1.5 5L12 20l4.5-11L15 4"/>' };
+    $('#ins').innerHTML = `
+      <div class="glass ic"><div class="ic-head"><h2>This month</h2></div>
+        <div class="ic-body"><div class="stats">
+          <div class="stat" tabindex="0" data-tip="${esc(`Your longest streak running right now: ${curBest.name}, ${curStreak} days in a row. A streak counts consecutive days a habit was done, up to today.`)}"><b>${curStreak}</b><span class="muted small">Current streak</span></div>
+          <div class="stat" tabindex="0" data-tip="${esc(`Your longest streak ever: ${bestBest.name}, ${bestStreak} days in a row.`)}"><b>${bestStreak}</b><span class="muted small">Best streak</span></div>
+          <div class="stat" tabindex="0" data-tip="${esc(`You wrote a reflection on ${wrote} of ${today.getDate()} days so far this month (${pct(wrote, today.getDate())}%).`)}"><b>${wrote}</b><span class="muted small">Days written</span></div>
+        </div>
+        <p class="cap muted small" aria-live="polite" data-d="Average mood so far: ${MOODS[Math.round(sum / wrote) - 1]}. ${entries >= 28 ? `Your best day for habits is ${dayName}.` : ''}"></p></div>
+      </div>
+      <div class="glass ic"><div class="ic-head"><h2>Habits over time</h2></div>
+        <div class="ic-filters"><div class="seg sm" role="group" aria-label="Group by" id="wk-g"><button type="button" data-g="day">Day</button><button type="button" data-g="week">Week</button><button type="button" data-g="month">Month</button></div>
+          <select class="field" id="wk-p" aria-label="Period"></select></div>
+        <p class="cap prompt" id="wk-cap" aria-live="polite"></p>
+        <div class="chart"><div class="yax" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div><div class="ic-body hscroll" id="wk"></div></div>
+      </div>
+      <div class="glass ic"><div class="ic-head"><h2>Each habit</h2></div><p class="cap muted small" aria-live="polite" data-d="Last 30 days, and the longest streak ever."></p>
+        <div class="ic-body">${per.map((p, k) => `<div class="hrow" tabindex="0" data-tip="${esc(`${p.name}: done ${Math.round(last30(k) * .3)} of the last 30 days. Current streak ${p.cur} days, best ${p.best} days.`)}"><span>${esc(p.name)}</span><span class="muted small">${last30(k)}% · best ${p.best} days</span><span class="meter" style="--p:${last30(k)}"><i></i></span></div>`).join('')}</div>
+      </div>
+      <div class="glass ic"><div class="ic-head"><h2>Milestones</h2></div><p class="cap muted small" aria-live="polite" data-d="Your best streak: ${bestStreak} days."></p>
+        <div class="ic-body"><div class="miles">${MILES.map(m => bestStreak >= m ? `<span class="chip" tabindex="0" data-got role="img" aria-label="${m} days, reached" data-tip="Reached: your best streak hit ${m} days."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>` : `<span class="chip" tabindex="0" data-tip="${m - bestStreak} more days of a streak to reach ${m}. Your best so far is ${bestStreak}."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>`).join('')}</div></div>
+      </div>`;
+    $$('#ins .cap').forEach(t => t.textContent = t.dataset.d);
+    $('#wk-g').onclick = e => { const b = e.target.closest('[data-g]'); if (b) { gr.g = b.dataset.g; drawBars(); } };
+    $('#wk-p').onchange = e => { const [y, m] = e.target.value.split('-').map(Number); gr.y = y; if (gr.g !== 'month') gr.m = m; drawBars(); };
+    drawBars();
+  }
+  // Hover, focus or tap an item: its card's caption explains it; leaving restores the default.
+  const tipOf = e => e.target.closest?.('#ins [data-tip]');
+  const showTip = e => {
+    const t = tipOf(e); if (!t) return; const c = t.closest('.ic');
+    c.querySelector('.cap').textContent = t.dataset.tip;
+  };
+  const hideTip = e => { const t = tipOf(e); if (t && !t.contains(e.relatedTarget)) { const k = t.closest('.ic'), c = k.querySelector('.cap'); c.textContent = c.dataset.d; } };
+  $('#ins').addEventListener('mouseover', showTip); $('#ins').addEventListener('focusin', showTip); $('#ins').addEventListener('click', showTip);
+  $('#ins').addEventListener('mouseout', hideTip); $('#ins').addEventListener('focusout', hideTip);
+  // Export: one CSV, one row per day with an entry. Sample text stands in for real reflections.
+  $('#export').onclick = () => {
+    const q = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; }; // quote, and defuse spreadsheet formulas
+    const rows = [['date', 'mood', 'went_well', 'hard', 'tomorrow', ...habits.map(h => h.name)]];
+    for (let d = new Date(signup); d <= today; d = add(d, 1)) {
+      const x = sample(d); if (!x.mood) continue;
+      rows.push([iso(d), MOODS[x.mood - 1], 'A calm walk, then coffee', 'Too many meetings', 'Start with the hardest task', ...habits.map((h, k) => x.done > k ? 1 : 0)]);
+    }
+    const a = Object.assign(document.createElement('a'), { download: `jurnala-export-${iso(today)}.csv`, href: URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' })) });
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+  $('.seg[aria-label="View"]').onclick = e => {
+    const b = e.target.closest('[data-view]'); if (!b || e.currentTarget.dataset.on === b.dataset.view) return;
+    const ins = b.dataset.view === 'ins', seg = e.currentTarget;
+    const swap = () => {
+      seg.dataset.on = b.dataset.view;
+      $$('[data-view]').forEach(x => x.setAttribute('aria-pressed', x === b));
+      $('#cal').hidden = ins; $('#ins').hidden = !ins; sheet.hidden = ins;
+      if (ins) { sheet.close(); drawInsights(); } else if (wide.matches && sel) $(`.day[data-key="${sel}"]`)?.click();
+    };
+    const from = ins ? $('#cal') : $('#ins'), to = ins ? $('#ins') : $('#cal');
+    if (calm.matches) return swap();
+    // Calendar is the left option: content slides left to right; back to Calendar: right to left.
+    const dir = ins ? -1 : 1, W = from.offsetParent.clientWidth + 32, o = { duration: 1400, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' };
+    const r = from.getBoundingClientRect(), par = from.offsetParent.getBoundingClientRect();
+    // wide screens: the day panel is a second card and travels with the calendar
+    const card = wide.matches && sheet.open && ins ? sheet : null, sr = sheet.getBoundingClientRect();
+    root.classList.add('vs');
+    sheet.style.transition = 'none'; // the day card only slides; no fade or lift of its own
+    Object.assign(from.style, { position: 'absolute', top: r.top - par.top + 'px', left: r.left - par.left + 'px', width: r.width + 'px', margin: 0 });
+    swap(); from.hidden = false;
+    if (card) { card.open = true; card.hidden = false; Object.assign(card.style, { position: 'absolute', top: sr.top - par.top + 'px', left: sr.left - par.left + 'px', width: sr.width + 'px', margin: 0 }); card.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o); }
+    else if (!ins && wide.matches) sheet.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o);
+    else sheet.hidden = true;
+    const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o);
+    to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o);
+    out.finished.finally(() => {
+      // one tick: drop every slide leftover together so nothing repaints twice
+      [from, to, sheet].forEach(el => el.getAnimations().forEach(x => x.cancel()));
+      from.hidden = true; from.removeAttribute('style'); root.classList.remove('vs'); sheet.hidden = ins;
+      if (card) card.close();
+      requestAnimationFrame(() => requestAnimationFrame(() => sheet.removeAttribute('style')));
+    });
+  };
+  drawMonth();
+})();
+
+renderHabits();
+setTheme(store.get('jurnala-theme') === 'classic' ? 'classic' : 'scenes');
+if (store.get('jurnala-phase')) $('#phase').value = store.get('jurnala-phase');
+setPhase($('#phase').value);
+if (location.hash) go(location.hash.slice(1)); // e.g. mockup.html#history
+</script>
+</body>
+</html>

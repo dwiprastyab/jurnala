@@ -1,0 +1,29 @@
+/* Reference from the approved board (Today / History / Settings, v7). Copy the rules, rename freely.
+   Layout idea: scene is fixed behind; content scrolls over it. */
+.bgwrap{position:fixed;inset:0;overflow:hidden;background:#0A0B26}
+.bgwrap .layer{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 1.2s cubic-bezier(.22,1,.36,1),visibility 0s 1.2s}
+.bgwrap .layer img{position:absolute;left:0;top:0;width:100%;height:460px;object-fit:cover;object-position:100% 50%;
+  -webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
+.bgwrap .s-night img{object-position:50% 50%}
+/* active layer: set data-theme on the root and data-phase from the clock */
+[data-theme=scenes][data-phase=dawn] .s-dawn,[data-theme=scenes][data-phase=day] .s-day,
+[data-theme=scenes][data-phase=dusk] .s-dusk,[data-theme=scenes][data-phase=night] .s-night,
+[data-theme=classic][data-phase=dawn] .c-dawn,[data-theme=classic][data-phase=day] .c-day,
+[data-theme=classic][data-phase=dusk] .c-dusk,[data-theme=classic][data-phase=night] .c-night{opacity:1;visibility:visible;transition-delay:0s}
+@media (prefers-reduced-motion:reduce){.bgwrap .layer{transition:none}}
+
+/* readability scrim over the scene (scenes theme only) */
+.topscrim{position:absolute;left:0;right:0;top:0;height:330px;pointer-events:none;
+  background:linear-gradient(rgb(10 8 30/.35),transparent 35%,transparent 50%,rgb(10 8 30/.55))}
+[data-theme=classic] .topscrim{display:none}
+h1,h1+*{text-shadow:0 1px 8px rgb(10 8 30/.5)}
+
+/* content scrolls over the fixed scene */
+.scroll{position:absolute;inset:0;overflow:auto;padding-bottom:24px}
+.scroll>header{position:relative;padding:56px 16px 16px;max-width:290px;min-height:300px;display:flex;flex-direction:column;justify-content:flex-end}
+
+/* glass on scenes: more opaque by day and dawn so text keeps contrast */
+:root{--ink:#FBF7F0;--muted:#ECE8F4;--glass:rgb(20 16 48/.40);--line:rgb(255 255 255/.22);--field:rgb(255 255 255/.10)}
+[data-phase=day]{--glass:rgb(20 16 56/.55)}
+[data-phase=dawn]{--glass:rgb(20 16 56/.46)}
+@media (prefers-reduced-transparency:reduce){.card{background:#1F1B45;backdrop-filter:none}}
