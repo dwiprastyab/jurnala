@@ -177,6 +177,9 @@ export async function checkinDaysByHabit(db: D1Database, userId: number, upToDay
 	return m
 }
 
+export const checkinDays = async (db: D1Database, userId: number, habitId: number, upToDay: string) =>
+	(await db.prepare('SELECT day FROM checkins WHERE habit_id = ? AND user_id = ? AND day <= ? ORDER BY day').bind(habitId, userId, upToDay).all<{ day: string }>()).results.map((r) => r.day)
+
 export const doneOnDay = async (db: D1Database, userId: number, day: string): Promise<Set<number>> =>
 	new Set((await db.prepare('SELECT habit_id FROM checkins WHERE user_id = ? AND day = ?').bind(userId, day).all<{ habit_id: number }>()).results.map((r) => r.habit_id))
 
