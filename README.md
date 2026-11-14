@@ -37,7 +37,7 @@ Public sign-up, self-service password reset, reminders or notifications, PWA or 
 | API | Hand-written `switch` router in `worker/` | No Hono or other framework. |
 | Database | Cloudflare D1 (SQLite) | Free, 500 MB per database. |
 | Auth | Email + password (PBKDF2-SHA256 via WebCrypto), session in an `HttpOnly; Secure; SameSite=Strict` cookie | Built here on purpose, small and auditable. |
-| Tests | Vitest + `@cloudflare/vitest-pool-workers` against a real local D1 | Tests run on the real runtime, not mocks. |
+| Tests | Vitest + `@cloudflare/vitest-plugin` against a real local D1 | Tests run on the real runtime, not mocks. |
 | Environments | Local (`wrangler dev`) and production. No staging. | One user, one environment that matters. |
 | Backup | Weekly manual `wrangler d1 export`, plus D1 Time Travel (7 days on Free) | |
 

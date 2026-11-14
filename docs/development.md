@@ -23,7 +23,7 @@ Details in [`../design/README.md`](../design/README.md).
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Vite dev server with the Worker; `curl -s localhost:5173/api/health` returns `{"ok":true}` |
-| `npx vitest run` | Tests against a real local D1 via `@cloudflare/vitest-pool-workers` |
+| `npx vitest run` | Tests against a real local D1 via `@cloudflare/vitest-plugin` |
 | `npx wrangler d1 migrations apply DB --local` | Apply migrations to the local D1 (B3) |
 | `npx wrangler deploy` | Deploy to production (first at B2) |
 

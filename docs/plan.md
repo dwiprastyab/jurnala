@@ -10,7 +10,7 @@ Rules for every task:
 - Never put real credentials in files, logs or commits.
 - Tailwind v4 uses CSS tokens: copy the custom properties from `DESIGN.md` (Scenes) and `design/mockup.html` (Classic), do not re-derive colours.
 - Do not edit `design/scenes/*.svg`. If a scene looks wrong, report it to the Owner.
-- Before B3, check the current `@cloudflare/vitest-pool-workers` docs for how to apply D1 migrations in tests. Do not rely on memory.
+- Before B3, check the current `@cloudflare/vitest-plugin` docs for how to apply D1 migrations in tests. Do not rely on memory.
 
 ---
 
@@ -20,7 +20,7 @@ Files: whole project skeleton, `wrangler.jsonc`, `vite.config.ts`, `vitest.confi
 
 Do:
 - `npm create cloudflare@latest -- jurnala --framework=react` (React + TypeScript, Vite, `@cloudflare/vite-plugin`). If the repo root is not empty, scaffold in a temp folder and move the files in; keep `CLAUDE.md`, `DESIGN.md`, `docs/`, `design/`.
-- Add Tailwind v4 (`@tailwindcss/vite`), Vitest + `@cloudflare/vitest-pool-workers`.
+- Add Tailwind v4 (`@tailwindcss/vite`), Vitest + `@cloudflare/vitest-plugin`.
 - `wrangler.jsonc`: `assets.run_worker_first: ["/api/*"]`, `assets.not_found_handling: "single-page-application"`, a D1 binding `DB`.
 - `GET /api/health` returns `{"ok":true}`.
 - Add `.gitignore` entries: `node_modules`, `.wrangler`, `dist`, `.dev.vars`, `.playwright-mcp`.

@@ -10,3 +10,6 @@ dist
 .playwright-mcp
 .codegraph
 .impeccable
+*.local
+dist-ssr
+.vscode

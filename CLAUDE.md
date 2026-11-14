@@ -19,7 +19,7 @@ Habit tracker + guided daily reflection. A learning project: the main goal is to
 - **Days:** the browser sends its local date as `YYYY-MM-DD`. The server never computes "today".
 - **Habits:** daily only; archive first. The only way to remove one is `Delete permanently` on an already-archived habit (confirm step; wipes its check-ins). No delete on active habits.
 - **Reflection:** one per day, four fixed prompts (see PRD), past days editable.
-- **Tests:** Vitest + `@cloudflare/vitest-pool-workers` against a real local D1.
+- **Tests:** Vitest + `@cloudflare/vitest-plugin` against a real local D1.
 - **Environments:** local (`wrangler dev`) and production. No staging.
 - **Backup:** weekly manual `wrangler d1 export`, plus D1 Time Travel (7 days on Free).
 
