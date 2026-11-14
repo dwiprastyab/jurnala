@@ -1,6 +1,6 @@
 import { clearedCookie, iterationsFor, newToken, readSessionToken, SESSION_SECONDS, sessionCookie, sha256Hex, verifyPassword } from './auth.ts'
 import * as db from './db.ts'
-import { streak, validDay } from './streak.ts'
+import { addDays, bestStreak, daysBetween, isRealDay, streak, validDay } from './streak.ts'
 
 const MAX_HABITS = 12
 const MAX_FAILS = 5
@@ -119,12 +119,124 @@ async function putCheckin(c: Ctx, habitId: string, day: string): Promise<Respons
 	return json({ habit_id: id, day, done: body.done, streak: streak(await db.checkinDays(env.DB, user.id, id, day), day) })
 }
 
+const TEXT_FIELDS = ['went_well', 'was_hard', 'tomorrow'] as const
+
+async function putEntry(c: Ctx, day: string): Promise<Response> {
+	if (!validDay(day)) return BAD_DAY()
+	const body = await readBody(c.req)
+	if (!body) return INVALID()
+	const text: Record<string, string | null> = {}
+	for (const f of TEXT_FIELDS) {
+		const v = body[f]
+		if (v !== undefined && v !== null && typeof v !== 'string') return INVALID()
+		const t = typeof v === 'string' ? v.trim() : ''
+		if (t.length > 4000) return fail(400, 'Keep each answer under 4,000 characters.')
+		text[f] = t === '' ? null : t
+	}
+	const mood = body.mood ?? null
+	if (mood !== null && !(Number.isInteger(mood) && (mood as number) >= 1 && (mood as number) <= 5)) return fail(400, 'Pick a mood from 1 to 5.')
+	if (mood === null && TEXT_FIELDS.every((f) => text[f] === null)) return fail(400, 'Add at least one answer.')
+	const entry = await db.putEntry(c.env.DB, c.user.id, { day, mood: mood as number | null, went_well: text.went_well, was_hard: text.was_hard, tomorrow: text.tomorrow }, new Date().toISOString())
+	return json({ entry })
+}
+
+async function dayView(c: Ctx, day: string): Promise<Response> {
+	if (!validDay(day)) return BAD_DAY()
+	const { DB } = c.env
+	const uid = c.user.id
+	const [habits, days, entry, prev] = await Promise.all([db.listHabits(DB, uid), db.checkinDaysByHabit(DB, uid, day), db.getEntry(DB, uid, day), db.getEntry(DB, uid, addDays(day, -1))])
+	return json({
+		day,
+		habits: habits.map((h) => {
+			const ds = days.get(h.id) ?? []
+			return { id: h.id, name: h.name, done: ds.includes(day), streak: streak(ds, day) }
+		}),
+		entry,
+		yesterday_tomorrow: prev?.tomorrow ?? null,
+	})
+}
+
+// shortcut: `total` and `done` compare to habits active now, not on that day; upgrade if it confuses the Owner
+async function dayRows(c: Ctx, from: string, to: string) {
+	const [rows, total] = await Promise.all([db.historyRows(c.env.DB, c.user.id, from, to), db.countActiveHabits(c.env.DB, c.user.id)])
+	return rows.map((r) => ({ day: r.day, mood: r.mood, done: r.done, total }))
+}
+
+async function history(c: Ctx): Promise<Response> {
+	const from = c.url.searchParams.get('from')
+	const to = c.url.searchParams.get('to')
+	if (!isRealDay(from) || !isRealDay(to)) return BAD_DAY()
+	if (from > to || daysBetween(from, to) > 41) return fail(400, 'Pick a range of up to 6 weeks.')
+	return json({ days: await dayRows(c, from, to) })
+}
+
+async function insights(c: Ctx): Promise<Response> {
+	const today = c.url.searchParams.get('today')
+	if (!validDay(today)) return BAD_DAY()
+	const { DB } = c.env
+	const uid = c.user.id
+	const [entries, days, habits, created, checks] = await Promise.all([
+		db.countEntries(DB, uid),
+		dayRows(c, addDays(today, -83), today),
+		db.listHabits(DB, uid),
+		db.habitCreatedDays(DB, uid),
+		db.checkinDaysByHabit(DB, uid, today),
+	])
+	const windowStart = addDays(today, -29)
+	return json({
+		entries,
+		days,
+		habits: habits.map((h) => {
+			const ds = checks.get(h.id) ?? []
+			const start = created.get(h.id)! > windowStart ? created.get(h.id)! : windowStart
+			const span = Math.max(daysBetween(start, today) + 1, 1)
+			const hits = ds.filter((d) => d >= start).length
+			return { id: h.id, name: h.name, last30: Math.min(100, Math.round((100 * hits) / span)), best_streak: bestStreak(ds), streak: streak(ds, today) }
+		}),
+	})
+}
+
+// A cell starting with = + - @ tab or CR is defused with a leading quote; one with , " or a newline is quoted.
+const csvCell = (v: string | number | null): string => {
+	let s = v === null ? '' : String(v)
+	if (/^[=+\-@\t\r]/.test(s)) s = "'" + s
+	return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s
+}
+
+async function exportCsv(c: Ctx): Promise<Response> {
+	const { habits, entries, checks } = await db.exportData(c.env.DB, c.user.id)
+	const lines: (string | number | null)[][] = [['date', 'mood', 'went_well', 'hard', 'tomorrow', ...habits.map((h) => h.name)]]
+	for (const e of entries) lines.push([e.day, e.mood, e.went_well, e.was_hard, e.tomorrow, ...habits.map((h) => (checks.has(`${h.id}|${e.day}`) ? 1 : 0))])
+	const body = '\uFEFF' + lines.map((l) => l.map(csvCell).join(',')).join('\r\n') + '\r\n'
+	return new Response(body, {
+		headers: {
+			'Content-Type': 'text/csv; charset=utf-8',
+			'Content-Disposition': `attachment; filename="jurnala-export-${new Date().toISOString().slice(0, 10)}.csv"`,
+		},
+	})
+}
+
 // Routes that need a signed-in user. `seg` is the path after /api.
 async function authed(c: Ctx, seg: string[]): Promise<Response> {
 	const { req } = c
 	switch (seg[0]) {
 		case 'habits':
 			return habits(c, seg)
+		case 'entries':
+			if (seg.length === 2 && req.method === 'PUT') return putEntry(c, seg[1])
+			break
+		case 'day':
+			if (seg.length === 2 && req.method === 'GET') return dayView(c, seg[1])
+			break
+		case 'history':
+			if (seg.length === 1 && req.method === 'GET') return history(c)
+			break
+		case 'insights':
+			if (seg.length === 1 && req.method === 'GET') return insights(c)
+			break
+		case 'export':
+			if (seg.length === 1 && req.method === 'GET') return exportCsv(c)
+			break
 		case 'checkins':
 			if (seg.length === 3 && req.method === 'PUT') return putCheckin(c, seg[1], seg[2])
 			break

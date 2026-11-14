@@ -37,10 +37,12 @@ export function bestStreak(sortedDays: string[]): number {
 	return best
 }
 
-// `YYYY-MM-DD`, a real calendar date, and not later than tomorrow in UTC (absorbs time zones).
-export function validDay(day: unknown, now = new Date()): day is string {
+// `YYYY-MM-DD` that is a real calendar date.
+export function isRealDay(day: unknown): day is string {
 	if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return false
 	const t = utc(day)
-	if (Number.isNaN(t) || new Date(t).toISOString().slice(0, 10) !== day) return false
-	return day <= addDays(now.toISOString().slice(0, 10), 1)
+	return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === day
 }
+
+// A real date, and not later than tomorrow in UTC (absorbs time zones).
+export const validDay = (day: unknown, now = new Date()): day is string => isRealDay(day) && day <= addDays(now.toISOString().slice(0, 10), 1)

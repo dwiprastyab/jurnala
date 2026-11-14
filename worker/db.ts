@@ -206,3 +206,41 @@ export async function countEntries(db: D1Database, userId: number): Promise<numb
 	const r = await db.prepare('SELECT COUNT(*) AS n FROM entries WHERE user_id = ?').bind(userId).first<{ n: number }>()
 	return r?.n ?? 0
 }
+
+// ---- day, history, insights, export ----
+
+export interface DayRow {
+	day: string
+	mood: number | null
+	done: number
+}
+
+// One row per day (inclusive range) that has an entry or at least one check-in. `done` counts check-ins of habits active now.
+export const historyRows = async (db: D1Database, userId: number, from: string, to: string) =>
+	(
+		await db
+			.prepare(
+				`SELECT d.day AS day, e.mood AS mood,
+				   (SELECT COUNT(*) FROM checkins c JOIN habits h ON h.id = c.habit_id AND h.user_id = ?1 AND h.archived_at IS NULL
+				    WHERE c.user_id = ?1 AND c.day = d.day) AS done
+				 FROM (SELECT day FROM entries WHERE user_id = ?1 AND day BETWEEN ?2 AND ?3
+				       UNION SELECT day FROM checkins WHERE user_id = ?1 AND day BETWEEN ?2 AND ?3) d
+				 LEFT JOIN entries e ON e.user_id = ?1 AND e.day = d.day
+				 ORDER BY d.day`,
+			)
+			.bind(userId, from, to)
+			.all<DayRow>()
+	).results
+
+export const habitCreatedDays = async (db: D1Database, userId: number): Promise<Map<number, string>> =>
+	new Map((await db.prepare('SELECT id, created_at FROM habits WHERE user_id = ?').bind(userId).all<{ id: number; created_at: string }>()).results.map((r) => [r.id, r.created_at.slice(0, 10)]))
+
+// Export: every habit (archived included, active order first), every entry oldest first, and the set of "habitId|day" check-ins.
+export const exportData = async (db: D1Database, userId: number) => {
+	const [habits, entries, checks] = await Promise.all([
+		db.prepare('SELECT id, name FROM habits WHERE user_id = ? ORDER BY archived_at IS NOT NULL, sort, id').bind(userId).all<{ id: number; name: string }>(),
+		db.prepare(`SELECT ${ENTRY_COLS} FROM entries WHERE user_id = ? ORDER BY day`).bind(userId).all<Entry>(),
+		db.prepare('SELECT habit_id, day FROM checkins WHERE user_id = ?').bind(userId).all<{ habit_id: number; day: string }>(),
+	])
+	return { habits: habits.results, entries: entries.results, checks: new Set(checks.results.map((c) => `${c.habit_id}|${c.day}`)) }
+}
