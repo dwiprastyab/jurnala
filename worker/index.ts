@@ -1,8 +1,9 @@
+import { handle } from './router.ts'
+
 export default {
-  async fetch(request) {
-    const url = new URL(request.url)
-    if (url.pathname === '/api/health') return Response.json({ ok: true })
-    if (url.pathname.startsWith('/api/')) return Response.json({ error: 'Not found.' }, { status: 404 })
-    return new Response(null, { status: 404 })
-  },
+	fetch(request, env) {
+		const url = new URL(request.url)
+		if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return handle(request, env)
+		return new Response(null, { status: 404 })
+	},
 } satisfies ExportedHandler<Env>
