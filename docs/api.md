@@ -8,7 +8,7 @@ Source of truth for request and response shapes. The backend (B4–B6) implement
 - **The journal follows the user's local time.** The day is always the browser's local calendar date. Build it from local parts (`getFullYear()`, `getMonth()+1`, `getDate()`, zero-padded). Never use `toISOString()` or `toJSON()` for a day: they give the UTC date, which is yesterday for someone in UTC+7 before 07:00. Put this in one helper, `localDay(date = new Date())` in `src/day.ts`, and use only it.
 - **Date arithmetic is on the string, not on local `Date` objects.** "Previous day", "next day", month grids and streaks parse `YYYY-MM-DD` into `Date.UTC(y, m-1, d)`, add days there, and format with the UTC getters. This is DST-safe. Both the Worker (`streak.ts`) and the browser use the same approach; test it across a month end, a year end, 29 February and a DST change.
 - Everything except `GET /api/health` and `POST /api/login` needs a valid session cookie. Missing or expired → `401 {"error":"Please sign in again."}`.
-- Write methods (`POST`, `PUT`, `PATCH`) need `Content-Type: application/json` and an `Origin` whose host equals the request host; otherwise `403 {"error":"That request isn't allowed."}`.
+- Write methods (`POST`, `PUT`, `PATCH`, `DELETE`) need an `Origin` whose host equals the request host, and, except `DELETE` (no body), `Content-Type: application/json`; otherwise `403 {"error":"That request isn't allowed."}`.
 - Errors are always `{"error":"<message>"}`. The message is shown to the user as is, so it says what happened and what to do.
 - A resource that does not exist or belongs to another user is the same `404 {"error":"Not found."}`. Never reveal which.
 - Unknown JSON fields are ignored. Wrong types → `400 {"error":"That isn't valid."}`.
