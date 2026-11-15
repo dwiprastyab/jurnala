@@ -21,23 +21,32 @@ async function historyRange(from: string, to: string): Promise<HistoryDay[]> {
   return (await Promise.all(jobs)).flatMap((r) => r.days)
 }
 
+// Last results, so the pane is already full when it slides in (no "Loading…" flash); they are refetched on every open.
+const seen = new Map<string, unknown>()
+const chartKey = (g: Group, key: string, first: string, today: string) => `c:${g}:${key}:${first}:${today}`
+const chartRange = (g: Group, key: string, first: string, today: string) => { const [a, z] = rangeOf(g, key); return historyRange(diffDays(a, first) < 0 ? first : a, diffDays(z, today) > 0 ? today : z) }
+export function prefetchInsights(today: string, first: string) {
+  api.insights(today).then((r) => seen.set('i:' + today, r), () => {})
+  const k = today.slice(0, 7)
+  chartRange('week', k, first, today).then((r) => seen.set(chartKey('week', k, first, today), r), () => {})
+}
+
 export function Insights({ today, first }: { today: string; first: string }) {
-  const [d, setD] = useState<InsightsData | null>(null)
+  const [d, setD] = useState<InsightsData | null>((seen.get('i:' + today) as InsightsData) ?? null)
   const [err, setErr] = useState('')
-  const load = () => { setErr(''); api.insights(today).then(setD, (e) => setErr(e.message)) }
+  const load = () => { setErr(''); api.insights(today).then((r) => { seen.set('i:' + today, r); setD(r) }, (e) => setErr(e.message)) }
   useEffect(load, [today]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Habits-over-time: Day / Week inside one month, Month inside one year.
   const [g, setG] = useState<Group>('week')
   const [period, setPeriod] = useState(today.slice(0, 7))
-  const [chartDays, setChartDays] = useState<HistoryDay[] | null>(null)
-  const [chartErr, setChartErr] = useState('')
   const key = g === 'month' ? period.slice(0, 4) : period
+  const [chartDays, setChartDays] = useState<HistoryDay[] | null>((seen.get(chartKey(g, key, first, today)) as HistoryDay[]) ?? null)
+  const [chartErr, setChartErr] = useState('')
   useEffect(() => {
     let live = true
-    setChartErr(''); setChartDays(null)
-    const [a, z] = rangeOf(g, key)
-    historyRange(diffDays(a, first) < 0 ? first : a, diffDays(z, today) > 0 ? today : z).then((r) => live && setChartDays(r), (e) => live && setChartErr(e.message))
+    setChartErr(''); setChartDays((seen.get(chartKey(g, key, first, today)) as HistoryDay[]) ?? null)
+    chartRange(g, key, first, today).then((r) => { seen.set(chartKey(g, key, first, today), r); live && setChartDays(r) }, (e) => live && setChartErr(e.message))
     return () => { live = false }
   }, [g, key, first, today])
 

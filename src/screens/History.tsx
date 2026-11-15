@@ -3,7 +3,7 @@ import { api, type DayData, type HistoryDay, type User } from '../api'
 import { addDays, addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
 import { Chevron, Cross, Pencil } from '../icons'
 import { MOODS } from '../mood'
-import { Insights } from './Insights'
+import { Insights, prefetchInsights } from './Insights'
 import { Md } from '../components/Rich'
 
 const wideQuery = '(min-width:700px)'
@@ -62,6 +62,7 @@ return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEa
   const sheet = useRef<HTMLDialogElement>(null)
   const shown = useRef<string | null>(null) // the day the panel last showed
 
+  useEffect(() => prefetchInsights(today, first), []) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const q = matchMedia(wideQuery), on = () => setWide(q.matches)
     q.addEventListener('change', on)
