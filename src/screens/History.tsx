@@ -17,15 +17,15 @@ export function History({ user, onEdit }: { user: User; onEdit: (day: string) =>
   const [sel, setSel] = useState<string | null>(() => (matchMedia(wideQuery).matches ? today : null)) // wide: the panel opens on today, as in the prototype
   const [view, setView] = useState<'cal' | 'ins'>('cal')
 const [leaving, setLeaving] = useState<'cal' | 'ins' | null>(null) // the pane sliding out; both panes exist while it runs
-const sheetFrom = useRef<{ top: number; left: number; width: number } | null>(null)
-const slideFrom = useRef<{ top: number; left: number; width: number } | null>(null)
+const sheetFrom = useRef<{ top: number; left: number; width: number; height: number } | null>(null)
+const slideFrom = useRef<{ top: number; left: number; width: number; height: number } | null>(null)
 const go = (next: 'cal' | 'ins') => {
 if (next === view || leaving) return
 if (next === 'cal' && !sel) auto.current = true
 if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setView(next)
 const el = document.getElementById(view)!, r = el.getBoundingClientRect(), par = el.offsetParent!.getBoundingClientRect()
-slideFrom.current = { top: r.top - par.top, left: r.left - par.left, width: r.width }
-const sh = sheet.current; sheetFrom.current = sh?.open && view === 'cal' ? (() => { const q = sh.getBoundingClientRect(); return { top: q.top - par.top, left: q.left - par.left, width: q.width } })() : null
+slideFrom.current = { top: r.top - par.top, left: r.left - par.left, width: r.width, height: r.height }
+const sh = sheet.current; sheetFrom.current = sh?.open && view === 'cal' ? (() => { const q = sh.getBoundingClientRect(); return { top: q.top - par.top, left: q.left - par.left, width: q.width, height: q.height } })() : null
 setLeaving(view); setView(next)
 }
 // Calendar is the left option: going to Insights the content slides left to right; back, right to left. 1400 ms.
@@ -35,7 +35,7 @@ const from = document.getElementById(leaving)!, to = document.getElementById(vie
 const dir = view === 'ins' ? -1 : 1, W = from.offsetParent!.clientWidth + 32, o: KeyframeAnimationOptions = { duration: 1400, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' }
 const f = slideFrom.current
 root.classList.add('vs')
-Object.assign(from.style, { position: 'absolute', top: f.top + 'px', left: f.left + 'px', width: f.width + 'px', margin: '0' })
+Object.assign(from.style, { position: 'absolute', top: f.top + 'px', left: f.left + 'px', width: f.width + 'px', height: f.height + 'px', maxHeight: 'none', margin: '0' })
 const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
 to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o)
 // wide: the day panel is a second card; it travels with the calendar, as in the prototype
@@ -43,7 +43,7 @@ const sh = sheet.current, sr = sheetFrom.current
 if (sh && matchMedia(wideQuery).matches && sel) {
 if (view === 'cal') { sh.style.transition = 'none'; sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o) }
 else if (sr) {
-Object.assign(sh.style, { transition: 'none', position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', margin: '0' })
+Object.assign(sh.style, { transition: 'none', position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', height: sr.height + 'px', maxHeight: 'none', margin: '0' })
 sh.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
 }
 }

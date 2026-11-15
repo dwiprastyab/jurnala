@@ -1246,9 +1246,9 @@ $('#add-form').onsubmit = e => {
     const card = wide.matches && sheet.open && ins ? sheet : null, sr = sheet.getBoundingClientRect();
     root.classList.add('vs');
     sheet.style.transition = 'none'; // the day card only slides; no fade or lift of its own
-    Object.assign(from.style, { position: 'absolute', top: r.top - par.top + 'px', left: r.left - par.left + 'px', width: r.width + 'px', margin: 0 });
+    Object.assign(from.style, { position: 'absolute', top: r.top - par.top + 'px', left: r.left - par.left + 'px', width: r.width + 'px', height: r.height + 'px', maxHeight: 'none', margin: 0 });
     swap(); from.hidden = false;
-    if (card) { card.open = true; card.hidden = false; Object.assign(card.style, { position: 'absolute', top: sr.top - par.top + 'px', left: sr.left - par.left + 'px', width: sr.width + 'px', margin: 0 }); card.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o); }
+    if (card) { card.open = true; card.hidden = false; Object.assign(card.style, { position: 'absolute', top: sr.top - par.top + 'px', left: sr.left - par.left + 'px', width: sr.width + 'px', height: sr.height + 'px', maxHeight: 'none', margin: 0 }); card.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o); }
     else if (!ins && wide.matches) sheet.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o);
     else sheet.hidden = true;
     const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o);
