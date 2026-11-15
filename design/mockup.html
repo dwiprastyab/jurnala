@@ -140,8 +140,12 @@ option { color: #2A2440; }
 .dragging [data-tip]::after { display: none; }
 
 /* reflection: read mode after Save */
-#reflection[data-mode="read"] .mood { pointer-events: none; }
+/* the faces stay as a read-only row: no tooltips, no generic :disabled fade (the app disables the fieldset); the chosen one sits on a tint of its mood colour */
+#reflection[data-mode="read"] :is(.moods, .mood) { opacity: 1; cursor: default; pointer-events: none; }
+#reflection[data-mode="read"] .tip { display: none; }
+#reflection[data-mode="read"] .scale { margin-bottom: 8px; }
 #reflection[data-mode="read"] .mood[aria-pressed="false"] { opacity: .35; }
+#reflection[data-mode="read"] .mood[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 55%, transparent); }
 
 /* ---------- rich editor (journal) ---------- */
 .ed { position: relative; display: grid; gap: 6px; }
@@ -208,11 +212,11 @@ hr { border: 0; border-top: 1px solid var(--glass-line); margin: 0; width: 100%;
 .moods legend { padding: 0; margin-bottom: 4px; }
 .scale { display: flex; position: relative; }
 .mw { flex: 1; position: relative; display: flex; --tx: -50%; }
-.mw:first-child { --tx: 0; } .mw:last-child { --tx: 0; }
+.mw:nth-child(-n+2), .mw:nth-last-child(-n+2) { --tx: 0; }
 .mw .mood { flex: 1; }
-/* hover and keyboard focus show what the face means; phones use the line under the faces */
-.tip { position: absolute; z-index: 3; bottom: calc(100% + 4px); left: 50%; width: 200px; transform: translate(var(--tx), 4px); padding: 10px 12px; border-radius: 14px; background: var(--solid); border: 1px solid var(--glass-line); box-shadow: var(--shadow); font-size: 14px; line-height: 1.4; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, transform .15s var(--ease), visibility 0s .15s; }
-.mw:first-child .tip { left: 0; } .mw:last-child .tip { left: auto; right: 0; }
+/* hover and keyboard focus show what the face means, below the face: above it the card's scroll box clips it at 700px+; phones use the line under the faces */
+.tip { position: absolute; z-index: 3; top: calc(100% + 4px); left: 50%; width: 200px; transform: translate(var(--tx), -4px); padding: 10px 12px; border-radius: 14px; background: var(--solid); border: 1px solid var(--glass-line); box-shadow: var(--shadow); font-size: 14px; line-height: 1.4; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, transform .15s var(--ease), visibility 0s .15s; }
+.mw:nth-child(-n+2) .tip { left: 0; } .mw:nth-last-child(-n+2) .tip { left: auto; right: 0; }
 .mw:has(:focus-visible) .tip { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); transition-delay: 0s; }
 @media (hover: hover) { .mw:hover .tip { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); transition-delay: 0s; } }
 .mood { flex: 1; min-height: 76px; padding: 8px 0 0; display: grid; justify-items: center; align-content: start; gap: 6px; border: 0; border-radius: 14px; background: transparent; font-size: 13px; color: var(--muted); }
