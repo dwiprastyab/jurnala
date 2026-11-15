@@ -31,6 +31,30 @@ Habit tracker + guided daily reflection. A learning project: the main goal is to
 - Never store real credentials in files or memory. The admin script prints the generated password once.
 - Needed before any second user: account/data deletion, self-service password reset.
 
+## Backup on request
+
+When the Owner asks to back up Jurnala data, run all of it yourself (steps in `docs/runbook.md` sections 4 and 4a). The export only reads production, so no extra confirmation is needed.
+
+1. `npx wrangler d1 export DB --remote --output ~/jurnala-backup-$(date +%F).sql`
+2. Check the file: size is not zero, `grep -c "CREATE TABLE"` and `grep -c "INSERT INTO"`. Compare with the production row counts (`SELECT count(*)` per table, `--remote`). Report both numbers.
+3. `rclone copy ~/jurnala-backup-$(date +%F).sql gdrive-crypt: -v`
+4. `rclone ls gdrive-crypt:` must show today's file with the same size as the local one.
+5. Report: file name, size, row counts, and whether upload matches. If any check fails or stderr shows an error, say so and stop. Do not report success on exit code alone.
+
+If rclone says the token is expired or invalid, tell the Owner to run `rclone config reconnect gdrive:` (needs their browser). Never print file contents, the rclone config, or the crypt passwords (`rclone config show` reveals them).
+
+## Deploy on request
+
+When the Owner asks to deploy to production, follow `docs/runbook.md` sections 1 and 2.
+
+1. `npm test`. If it fails, stop and report.
+2. If there is a new file in `migrations/` (compare with the `d1_migrations` table on production): this is a database change. Back up first (see "Backup on request"), ask for confirmation, run `npx wrangler d1 migrations apply DB --remote`, then deploy the code. A migration cannot be undone by `wrangler rollback`.
+3. Ask for confirmation once before `npm run deploy`, because it changes production. State what will be deployed (the commits since the last deploy).
+4. After deploy: `curl -s --doh-url https://cloudflare-dns.com/dns-query https://jurnala.dwiprastyab.workers.dev/api/health` must return `{"ok":true}`. Report the result.
+5. If the health check fails or errors appear, report it and offer `npx wrangler rollback`. Do not run the rollback on your own.
+
+Uncommitted changes: say so before deploying, and let the Owner decide.
+
 ## Spike result (fill in at B2)
 
 - PBKDF2-SHA256 iterations chosen: 100,000 (unchanged)

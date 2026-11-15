@@ -2,7 +2,7 @@
 
 A habit tracker with a guided daily reflection. Tick off your habits, answer four fixed questions each evening, and be done in under two minutes. It sits on a full-screen illustrated scene that follows the time of day.
 
-> **Status: backend and frontend built locally, not deployed.** B1 and B3–B9 are done and run on `wrangler dev` / Vite. B2 (PBKDF2 spike on the real free plan) and B10 (production deploy) are still pending and need the owner. Nothing runs on Cloudflare yet.
+> **Status: live in production** at `jurnala.dwiprastyab.workers.dev`. B1–B9 are done, B2 (PBKDF2 spike) passed on the free plan, and the first deploy is out. B10 is finishing: runbook and backups are written, and the 14-day production trial has not started yet. See [docs/runbook.md](docs/runbook.md).
 
 Jurnala is a **learning project**. The main goal is to learn free hosting on Cloudflare: Workers, Static Assets and D1. Version 1 "graduates" when its owner has used it in production for 14 days in a row. It is built for one person, mostly on a phone, mostly in the evening. It is not a multi-user product yet (see [Known limits](#known-limits-accepted-for-v1)).
 
