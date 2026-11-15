@@ -58,7 +58,7 @@ Check the file before you trust it:
 |---|---|
 | File is not empty | `ls -lh ~/jurnala-backup-$(date +%F).sql` |
 | It has our tables | `grep -c "CREATE TABLE" ~/jurnala-backup-$(date +%F).sql` (expect 6 plus `d1_migrations`) |
-| Row counts match production | compare `grep -c "INSERT INTO" <file>` against `SELECT count(*)` of each table (see [database.md](database.md) section 7, with `--remote`) |
+| Row counts match production | `grep -c "INSERT INTO" <file>` should equal the total rows of all tables (including `d1_migrations`) plus 1 for the internal `sqlite_sequence` row. Get counts with [database.md](database.md) section 7, `--remote`. Verified 2026-11-16. |
 
 The backup holds journal text. Keep it off GitHub, shared drives and chat.
 

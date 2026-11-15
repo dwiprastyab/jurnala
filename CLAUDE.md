@@ -31,12 +31,16 @@ Habit tracker + guided daily reflection. A learning project: the main goal is to
 - Never store real credentials in files or memory. The admin script prints the generated password once.
 - Needed before any second user: account/data deletion, self-service password reset.
 
+## Production trial
+
+- Started 2026-11-16 (day 1). Day 14 is 2026-11-29. Counts only days the Owner opens and fills the app. A missed day restarts the count.
+
 ## Backup on request
 
 When the Owner asks to back up Jurnala data, run all of it yourself (steps in `docs/runbook.md` sections 4 and 4a). The export only reads production, so no extra confirmation is needed.
 
 1. `npx wrangler d1 export DB --remote --output ~/jurnala-backup-$(date +%F).sql`
-2. Check the file: size is not zero, `grep -c "CREATE TABLE"` and `grep -c "INSERT INTO"`. Compare with the production row counts (`SELECT count(*)` per table, `--remote`). Report both numbers.
+2. Check the file: size is not zero, `grep -c "CREATE TABLE"` and `grep -c "INSERT INTO"`. Compare with the production row counts (`SELECT count(*)` per table, `--remote`, including `d1_migrations`). `INSERT INTO` should equal the total of all rows plus 1 (the internal `sqlite_sequence` row; verified 2026-11-16). Report both numbers.
 3. `rclone copy ~/jurnala-backup-$(date +%F).sql gdrive-crypt: -v`
 4. `rclone ls gdrive-crypt:` must show today's file with the same size as the local one.
 5. Report: file name, size, row counts, and whether upload matches. If any check fails or stderr shows an error, say so and stop. Do not report success on exit code alone.
