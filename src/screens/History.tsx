@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { api, type DayData, type HistoryDay, type User } from '../api'
-import { addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
+import { addDays, addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
 import { Chevron, Cross, Pencil } from '../icons'
 import { MOODS } from '../mood'
 import { Insights } from './Insights'
@@ -17,12 +17,15 @@ export function History({ user, onEdit }: { user: User; onEdit: (day: string) =>
   const [sel, setSel] = useState<string | null>(() => (matchMedia(wideQuery).matches ? today : null)) // wide: the panel opens on today, as in the prototype
   const [view, setView] = useState<'cal' | 'ins'>('cal')
 const [leaving, setLeaving] = useState<'cal' | 'ins' | null>(null) // the pane sliding out; both panes exist while it runs
+const sheetFrom = useRef<{ top: number; left: number; width: number } | null>(null)
 const slideFrom = useRef<{ top: number; left: number; width: number } | null>(null)
 const go = (next: 'cal' | 'ins') => {
 if (next === view || leaving) return
+if (next === 'cal' && !sel) auto.current = true
 if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setView(next)
 const el = document.getElementById(view)!, r = el.getBoundingClientRect(), par = el.offsetParent!.getBoundingClientRect()
 slideFrom.current = { top: r.top - par.top, left: r.left - par.left, width: r.width }
+const sh = sheet.current; sheetFrom.current = sh?.open && view === 'cal' ? (() => { const q = sh.getBoundingClientRect(); return { top: q.top - par.top, left: q.left - par.left, width: q.width } })() : null
 setLeaving(view); setView(next)
 }
 // Calendar is the left option: going to Insights the content slides left to right; back, right to left. 1400 ms.
@@ -35,12 +38,22 @@ root.classList.add('vs')
 Object.assign(from.style, { position: 'absolute', top: f.top + 'px', left: f.left + 'px', width: f.width + 'px', margin: '0' })
 const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
 to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o)
+// wide: the day panel is a second card; it travels with the calendar, as in the prototype
+const sh = sheet.current, sr = sheetFrom.current
+if (sh && matchMedia(wideQuery).matches && sel) {
+if (view === 'cal') { sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o) }
+else if (sr) {
+Object.assign(sh.style, { position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', margin: '0' })
+sh.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
+}
+}
 let done = false
 const end = () => { if (done) return; done = true; root.classList.remove('vs'); setLeaving(null) }
 out.finished.then(end, () => {})
-return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); root.classList.remove('vs'); end() }
+return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); sheet.current?.removeAttribute('style'); root.classList.remove('vs'); end() }
 }, [leaving]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picker, setPicker] = useState(false)
+  const auto = useRef(true) // until the person picks a day, the panel follows the default
   const [py, setPy] = useState(Number(today.slice(0, 4)))
   const [days, setDays] = useState<Map<string, HistoryDay>>(new Map())
   const [err, setErr] = useState('')
@@ -64,23 +77,30 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
     return () => { live = false }
   }, [month, n])
 
+  // wide: the panel always shows a day: today, or yesterday when today has nothing saved yet
+  useEffect(() => {
+    if (!wide || !auto.current || month !== monthOf(today) || !days.size && !err) return
+    const y = addDays(today, -1)
+    setSel(!days.get(today)?.entry && y >= first ? y : today)
+  }, [days, wide, view]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const minMonth = monthOf(first), maxMonth = monthOf(today)
-  const goDay = useCallback((day: string) => { setSel(day); setMonth(monthOf(day)) }, [])
+  const goDay = useCallback((day: string) => { auto.current = false; setSel(day); setMonth(monthOf(day)) }, [])
 
   // The sheet is a modal on phones and a panel beside the grid from 700px.
   useEffect(() => {
     const d = sheet.current
     if (!d) return
-    if (!sel || view !== 'cal') { if (d.open) d.close(); return }
+    if (!sel || (view !== 'cal' && leaving !== 'cal')) { if (d.open) d.close(); return }
     if (d.open) return
     if (wide) d.open = true // not show(): it would pull focus off the grid
     else d.showModal()
-  }, [sel, view, wide])
+  }, [sel, view, wide, leaving])
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (!sel || view !== 'cal' || e.defaultPrevented) return
-      if (e.key === 'Escape' && wide) setSel(null)
+      if (e.key === 'Escape' && wide) { auto.current = false; setSel(null) }
     }
     addEventListener('keydown', on)
     return () => removeEventListener('keydown', on)
@@ -139,7 +159,7 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
                       data-mood={mood ?? undefined} style={mood ? col(`var(--mood-${mood})`) : undefined}
                       aria-current={key === today ? 'date' : undefined} aria-pressed={key === sel}
                       aria-label={`${longDateY(key)}${pre ? ', before you joined' : mood ? `, ${MOODS[mood - 1]}, ${x!.done} of ${x!.total} habits done` : future ? '' : x?.entry ? ', reflection without a mood' : ', no reflection'}`}
-                      onClick={() => setSel(key)}><i>{Number(key.slice(8))}</i></button>
+                      onClick={() => { auto.current = false; setSel(key) }}><i>{Number(key.slice(8))}</i></button>
                   )
                 })}
               </div>

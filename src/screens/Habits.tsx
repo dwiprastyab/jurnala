@@ -16,8 +16,7 @@ export function Habits() {
   const [name, setName] = useState('')
   const [dragId, setDragId] = useState<number | null>(null)
   const ul = useRef<HTMLUListElement>(null)
-  const tops = useRef(new Map<number, number>())
-  const focusId = useRef<number | null>(null)
+    const focusId = useRef<number | null>(null)
   const ref = useRef<Habit[]>([])
   ref.current = list ?? []
 
@@ -27,15 +26,19 @@ export function Habits() {
   }, [])
   useEffect(() => { load() }, [load])
 
-  // FLIP: rows slide from where they were to where they are (380 ms), unless motion is reduced.
+  // FLIP, as in the prototype: every row and block glides from where it was to where it is now; new ones fade in.
+  const root = useRef<HTMLElement>(null)
+  const pos = useRef<Map<string, DOMRect> | null>(null)
   useLayoutEffect(() => {
-    const next = new Map<number, number>()
-    ul.current?.querySelectorAll<HTMLElement>('li[data-id]').forEach((li) => {
-      const id = Number(li.dataset.id), top = li.getBoundingClientRect().top, was = tops.current.get(id)
-      next.set(id, top)
-      if (was !== undefined && was !== top && !calm()) li.animate([{ transform: `translateY(${was - top}px)` }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' })
+    const els = [...(root.current?.querySelectorAll<HTMLElement>('li[data-id], .add, #arch-wrap') ?? [])]
+    const next = new Map(els.map((e) => [e.dataset.id ? 'h' + e.dataset.id : e.id || 'add', e.getBoundingClientRect()]))
+    const prev = pos.current
+    if (prev && !calm()) els.forEach((e) => {
+      const k = e.dataset.id ? 'h' + e.dataset.id : e.id || 'add', a = prev.get(k), b = next.get(k)!
+      if (!a) e.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' })
+      else if (a.left !== b.left || a.top !== b.top) e.animate([{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)` }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' })
     })
-    tops.current = next
+    pos.current = list ? next : null // the first paint of the lists is not animated
     if (focusId.current !== null) { ul.current?.querySelector<HTMLElement>(`[data-grip="${focusId.current}"]`)?.focus(); focusId.current = null }
   })
 
@@ -95,11 +98,20 @@ export function Habits() {
     try { await api.patchHabit(h.id, { archived: false }); setMsg(null); load() } catch (x) { fail(x) }
   }
   async function del(h: Habit) {
-    try { await api.deleteHabit(h.id); setAsking(null); setMsg({ text: `Deleted "${h.name}" permanently.` }); load() } catch (x) { fail(x) }
+    try {
+      await api.deleteHabit(h.id); setMsg({ text: `Deleted "${h.name}" permanently.` })
+      // the row (or the whole Archived block, if it was the last) fades and folds shut; the rest follows it up
+      const el = arch.length > 1 ? root.current?.querySelector<HTMLElement>(`.arch li[data-id="${h.id}"]`) : root.current?.querySelector<HTMLElement>('#arch-wrap')
+      if (el && !calm()) {
+        const px = el.offsetHeight + 'px'; el.style.overflow = 'hidden'
+        await el.animate([{ opacity: 1, height: px, minHeight: px }, { opacity: 0, height: '0px', minHeight: '0px' }], { duration: 300, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished.catch(() => {})
+      }
+      setAsking(null); await load()
+    } catch (x) { fail(x) }
   }
 
   return (
-    <section className="screen narrow">
+    <section className="screen narrow" ref={root}>
       <div className="head"><div><h1>Habits</h1><p className="muted">Small things, done daily</p></div></div>
       <div className="glass stack">
         <h2>Your habits</h2>
@@ -134,18 +146,18 @@ export function Habits() {
         </form>
         <p className="muted small" role="status" hidden={!msg}>{msg?.text}{msg?.undo && <> <button className="btn text" type="button" onClick={msg.undo}>Undo</button></>}</p>
         {arch.length > 0 && (
-          <div>
+          <div id="arch-wrap">
             <h2 className="arch-h">Archived</h2>
             <p className="muted small">Hidden from Today. Their past check-ins stay in History and the CSV.</p>
             <ul className="manage arch">
               {arch.map((h) => asking === h.id ? (
-                <li key={h.id}>
+                <li key={h.id} data-id={h.id}>
                   <span className="ask">Delete "{h.name}" and all its check-ins? This cannot be undone.</span>
                   <button className="mini danger" type="button" data-tip="Delete permanently" aria-label={`Confirm: delete ${h.name} permanently`} onClick={() => del(h)}><Tick /></button>
                   <button className="mini" type="button" data-tip="Cancel" aria-label="Cancel delete" onClick={() => setAsking(null)}><Cross /></button>
                 </li>
               ) : (
-                <li key={h.id}>
+                <li key={h.id} data-id={h.id}>
                   <span className="name">{h.name}</span>
                   <button className="mini" type="button" data-tip="Restore" aria-label={`Restore ${h.name}`} onClick={() => restore(h)}><Restore /></button>
                   <button className="mini danger" type="button" data-tip="Delete permanently" aria-label={`Delete ${h.name} permanently`} onClick={() => setAsking(h.id)}><Trash /></button>

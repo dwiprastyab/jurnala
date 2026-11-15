@@ -148,6 +148,7 @@ Navigation changes per width; see Layouts.
 - Legend under the grid: the five mood swatches with their words, and the dot with `Every habit done`.
 - Each cell is a button whose label reads `Friday, 6 November 2026, Good, 3 of 4 habits done`, `…, no reflection` or `…, before you joined`.
 - **Day sheet** (phone: modal `<dialog>` rising from the bottom with a backdrop; 700px and up: a panel beside the calendar). A read-only summary, top to bottom: the date (Newsreader), a line `Good. 3 of 4 habits done.` (or `Every habit done.`, or `Nothing saved for this day.`), the three prompts as a definition list with the answers rendered from markdown, then two icon buttons: `Edit this day` and `Close`. No habit list, no `Previous day` / `Next day`. `Edit this day` opens Today for that day (`You are editing a past day.`, a `Back to today` icon button).
+- Quote: the `Jurnala` quote is the first child of the page (top of the content), not below it. Page headers are not sticky on phones.
 - Keyboard: `Esc` closes the sheet (also on wide screens); focus returns to the calendar cell that opened it. No arrow-key stepping.
 - Past-day habit ticking happens on Today after `Edit this day` (decided: the prototype wins).
 
@@ -212,7 +213,7 @@ Motion only answers an action or the clock. Two curves: `--ease: cubic-bezier(.2
 | `Saved.` and the closing line | Fade in 400 ms |
 | Scene or sky phase change | 1.2 s cross-fade |
 | Switching theme (Scenes ↔ Classic) | Soft wipe, no hard cut |
-| Calendar ↔ Insights | Pane slides sideways, 1.4 s, `cubic-bezier(.65,0,.35,1)`. The open day card should travel with it on wide screens (**not built**: the sheet closes while the pane slides) |
+| Calendar ↔ Insights | Pane slides sideways, 1.4 s, `cubic-bezier(.65,0,.35,1)`. The open day panel travels with it on wide screens, and coming back to Calendar always reopens it (today, or yesterday when today has no reflection yet) |
 | Segmented pill (`Background`, `Calendar \| Insights`) | Pill glides 1.4 s |
 | Scene mode | Cards fly out 500 ms (60 ms stagger), back in 800 ms (80 ms stagger); scene zooms to 1.04 over 1.6 s; scrim to 35% |
 | Inside the scenes | Slow drifting clouds, twinkling stars, water shimmer, window lights; already in the SVGs |

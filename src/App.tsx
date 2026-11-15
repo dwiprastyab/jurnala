@@ -100,6 +100,7 @@ export default function App() {
       <Scene />
       {user && <Nav screen={screen} current={mode !== 'quote'} onGo={go} onBrand={() => (mode === 'off' ? enter('quote') : mode === 'scene' ? setMode('quote') : undefined)} quote={mode === 'quote'} />}
       <main className="app">
+        {user && <div className="quote" id="quote" role="status"><p>{quoteOfDay()}</p></div>}
         {user === undefined ? null : !user ? <SignIn onIn={(u) => { setScreen('today'); setUser(u) }} /> :
           screen === 'today' ? <Today key={editDay ?? 'now'} user={user} hour={t.hour} day={editDay} onGo={go} onBack={() => setEditDay(null)} /> :
           screen === 'history' ? <History user={user} onEdit={(d) => go('today', d)} /> :
@@ -109,7 +110,6 @@ export default function App() {
       {user && (
         <>
           <button className="icon-btn view" id="view-scene" type="button" aria-pressed={mode !== 'off'} aria-label="View scene" onClick={() => (mode === 'off' ? enter('scene') : leave())}><Eye /></button>
-          <div className="quote" id="quote" role="status"><p>{quoteOfDay()}</p></div>
         </>
       )}
     </>
