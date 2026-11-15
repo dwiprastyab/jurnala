@@ -77,7 +77,7 @@ Add, rename, reorder by drag and drop (or Arrow Up/Down on the grip), archive. A
 - `Sign out`.
 
 ### 7. Insights (second view in History)
-History has a `Calendar | Insights` switch. Insights shows only after 7 or more days with an entry; before that: `Insights appear after a week of entries.` Four cards:
+History has a `Calendar | Insights` switch. Insights shows only after 7 or more days with an entry; before that the four cards show as a dimmed preview under a progress card (`Insights unlock at 7 entries`). Four cards:
 - **This month**: current streak, best streak, days written, average mood; and, from 28 days of data, `Your best day for habits is Monday.`
 - **Habits over time**: share of habits done, as bars on a 0–100% axis. A `Day | Week | Month` switch picks the bar size, and a `Period` select picks what to show: Day and Week show one calendar month (a week belongs to the month of its Monday), Month shows one year. The select lists sign-up to now, newest first. The exact percentage shows on hover, focus or tap (and in the caption line), plus a message about the finished bars (feature 8, with "day", "week" or "month" in the wording). The newest bar is the current period so far and is not counted in the message.
 - **Each habit**: last-30-day percentage with a meter (a habit younger than 30 days is counted from its first day, so `done of the last N days` uses N under 30), and best streak ever.

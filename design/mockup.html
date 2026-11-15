@@ -290,6 +290,9 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .btn.ib { width: 44px; height: 44px; min-height: 0; padding: 0; display: inline-grid; place-items: center; flex: none; }
 .btn.ib svg { width: 18px; height: 18px; }
 .btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#ins.locked .ic-filters { display: none; }
+#ins.locked .stat b, #ins.locked .chart, #ins.locked .hrow { opacity: .5; }
+#ins.locked .bar .fill { background: none; border: 1.5px dashed var(--muted); }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stat { padding: 6px 4px; text-align: center; display: grid; gap: 4px; align-content: start; }
 .stat b { display: block; font-family: var(--serif); font-weight: 400; font-size: 34px; line-height: 1.1; }
@@ -1167,7 +1170,7 @@ $('#add-form').onsubmit = e => {
   }
   function drawInsights() {
     let entries = 0; for (let d = new Date(signup); d <= today; d = add(d, 1)) entries += sample(d).mood ? 1 : 0;
-    if (entries < 7) { $('#ins').innerHTML = '<div class="glass"><p>Insights appear after a week of entries.</p></div>'; return; }
+    const locked = entries < 7; // under a week of entries the same cards show as a dimmed preview
     // this month
     const ms = new Date(today.getFullYear(), today.getMonth(), 1); let wrote = 0, sum = 0;
     for (let d = ms; d <= today; d = add(d, 1)) { const m = sample(d).mood; if (m) { wrote++; sum += m; } }
@@ -1204,9 +1207,18 @@ $('#add-form').onsubmit = e => {
         <div class="ic-body"><div class="miles">${MILES.map(m => bestStreak >= m ? `<span class="chip" tabindex="0" data-got role="img" aria-label="${m} days, reached" data-tip="Reached: your best streak hit ${m} days."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>` : `<span class="chip" tabindex="0" data-tip="${m - bestStreak} more days of a streak to reach ${m}. Your best so far is ${bestStreak}."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>`).join('')}</div></div>
       </div>`;
     $$('#ins .cap').forEach(t => t.textContent = t.dataset.d);
+    $('#ins').classList.toggle('locked', locked);
+    if (locked) {
+      const caps = $$('#ins .cap'); ['Streaks and days written will show here.', 'Your habit chart will show here.', 'Each habit over the last 30 days will show here.'].forEach((t, i) => { caps[i].dataset.d = caps[i].textContent = t; });
+      $$('#ins .stat b').forEach(b => b.textContent = '–');
+      $$('#ins .stat, #ins .hrow').forEach(e => { e.removeAttribute('data-tip'); e.removeAttribute('tabindex'); });
+      $$('#ins .hrow').forEach(r => { r.children[1].textContent = '–'; r.querySelector('.meter').style.setProperty('--p', 0); });
+      $('#ins').insertAdjacentHTML('afterbegin', `<div class="glass ic"><div class="ic-head"><h2>Insights unlock at 7 entries</h2></div><p class="cap muted small">${entries} of 7 entries so far. Save a mood each day to unlock them.</p><span class="meter" role="progressbar" aria-label="Entries so far" aria-valuemin="0" aria-valuemax="7" aria-valuenow="${entries}" style="--p:${Math.round(entries / 7 * 100)}"><i></i></span></div>`);
+    }
     $('#wk-g').onclick = e => { const b = e.target.closest('[data-g]'); if (b) { gr.g = b.dataset.g; drawBars(); } };
     $('#wk-p').onchange = e => { const [y, m] = e.target.value.split('-').map(Number); gr.y = y; if (gr.g !== 'month') gr.m = m; drawBars(); };
     drawBars();
+    if (locked) $('#wk').innerHTML = [35, 60, 45, 75, 55, 85, 50].map(p => `<div class="bar g-week"><span class="plot"><span class="fill" style="--p:${p}"></span></span><span class="lbl"></span></div>`).join('');
   }
   // Hover, focus or tap an item: its card's caption explains it; leaving restores the default.
   const tipOf = e => e.target.closest?.('#ins [data-tip]');

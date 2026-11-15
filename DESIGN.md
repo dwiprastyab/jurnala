@@ -162,7 +162,7 @@ Four glass cards (one column on phone; two columns from 700px, the same width as
 - **Each habit**: name, `87% · best 14 days`, a thin meter; list scrolls vertically.
 - **Milestones**: 7, 14, 30, 60, 100, 180, 365 days; reached ones show a medal icon (SVG, not emoji), the others read `30 days` in bold (the accessible label adds `reached` or `14 to go`); list scrolls vertically.
 - **Switching** Calendar ↔ Insights slides the pane sideways (1.4 s); the open day card should slide with it on wide screens (not built yet); reduced motion: instant.
-- Empty state before 7 entries: `Insights appear after a week of entries.` in one card.
+- Before 7 entries: the same four cards show as a dimmed preview (values `–`, 0% meters, dashed ghost bars, no hover tips, filters hidden), led by a progress card: `Insights unlock at 7 entries` / `N of 7 entries so far. Save a mood each day to unlock them.` + meter.
 - No chart library: inline SVG or CSS only.
 
 ### Encouragement

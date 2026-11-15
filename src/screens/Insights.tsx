@@ -31,6 +31,9 @@ export function prefetchInsights(today: string, first: string) {
   chartRange('week', k, first, today).then((r) => seen.set(chartKey('week', k, first, today), r), () => {})
 }
 
+// Fixed bars for the locked preview; the field names match what series() returns.
+const GHOST = [35, 60, 45, 75, 55, 85, 50].map((p, i) => ({ start: String(i), p, label: '', tip: '', done: 0, poss: 0, live: false }))
+
 export function Insights({ today, first }: { today: string; first: string }) {
   const [d, setD] = useState<InsightsData | null>((seen.get('i:' + today) as InsightsData) ?? null)
   const [err, setErr] = useState('')
@@ -52,14 +55,16 @@ export function Insights({ today, first }: { today: string; first: string }) {
 
   if (err) return <div className="ins" id="ins"><p className="glass" role="alert">{err} <button className="btn text" type="button" onClick={load}>Try again</button></p></div>
   if (!d) return <div className="ins" id="ins"><p className="glass muted" role="status">Loading…</p></div>
-  if (d.entries < MIN_ENTRIES) return <div className="ins" id="ins"><div className="glass"><p>Insights appear after a week of entries.</p></div></div>
+  // Under a week of entries the same cards show as a dimmed preview, so the pane keeps its height and says what is coming.
+  const locked = d.entries < MIN_ENTRIES
+  const tip = (t: string) => (locked ? {} : { tabIndex: 0, 'data-tip': t })
 
   const n = d.habits.length
   const { current, best } = streakStats(d.habits)
   const bestH = d.habits.find((h) => h.best_streak === best), curH = d.habits.find((h) => h.streak === current)
   const ms = monthStats(d.days, today)
   const wd = bestWeekday(d.days, today, n, first)
-  const bars = chartDays ? series(chartDays, g, key, today, n, first) : []
+  const bars = locked ? GHOST : chartDays ? series(chartDays, g, key, today, n, first) : []
   const msg = periodMessage(g, bars.filter((b) => !b.live).map((b) => b.p))
   const months = periods(first, today)
   const years = [...new Set(months.map((m) => m.slice(0, 4)))]
@@ -67,16 +72,23 @@ export function Insights({ today, first }: { today: string; first: string }) {
   const ev = { onMouseOver: show, onFocus: show, onClick: show, onMouseOut: hide, onBlur: hide }
 
   return (
-    <div className="ins" id="ins" {...ev}>
+    <div className={`ins${locked ? ' locked' : ''}`} id="ins" {...ev}>
+      {locked && (
+        <div className="glass ic">
+          <div className="ic-head"><h2>Insights unlock at {MIN_ENTRIES} entries</h2></div>
+          <p className="cap muted small">{d.entries} of {MIN_ENTRIES} entries so far. Save a mood each day to unlock them.</p>
+          <span className="meter" role="progressbar" aria-label="Entries so far" aria-valuemin={0} aria-valuemax={MIN_ENTRIES} aria-valuenow={d.entries} style={{ '--p': Math.round(d.entries / MIN_ENTRIES * 100) } as React.CSSProperties}><i /></span>
+        </div>
+      )}
       <div className="glass ic">
         <div className="ic-head"><h2>This month</h2></div>
         <div className="ic-body">
           <div className="stats">
-            <div className="stat" tabIndex={0} data-tip={`Your longest streak running right now${curH && current ? `: ${curH.name}, ${current} days in a row` : ''}. A streak counts consecutive days a habit was done, up to today.`}><b>{current}</b><span className="muted small">Current streak</span></div>
-            <div className="stat" tabIndex={0} data-tip={`Your longest streak ever${bestH && best ? `: ${bestH.name}, ${best} days in a row` : ''}.`}><b>{best}</b><span className="muted small">Best streak</span></div>
-            <div className="stat" tabIndex={0} data-tip={`You saved a mood on ${ms.wrote} of ${ms.dayOfMonth} days so far this month (${pct(ms.wrote, ms.dayOfMonth)}%).`}><b>{ms.wrote}</b><span className="muted small">Days written</span></div>
+            <div className="stat" {...tip(`Your longest streak running right now${curH && current ? `: ${curH.name}, ${current} days in a row` : ''}. A streak counts consecutive days a habit was done, up to today.`)}><b>{locked ? '–' : current}</b><span className="muted small">Current streak</span></div>
+            <div className="stat" {...tip(`Your longest streak ever${bestH && best ? `: ${bestH.name}, ${best} days in a row` : ''}.`)}><b>{locked ? '–' : best}</b><span className="muted small">Best streak</span></div>
+            <div className="stat" {...tip(`You saved a mood on ${ms.wrote} of ${ms.dayOfMonth} days so far this month (${pct(ms.wrote, ms.dayOfMonth)}%).`)}><b>{locked ? '–' : ms.wrote}</b><span className="muted small">Days written</span></div>
           </div>
-          <Cap text={`${avg} ${wd ? `Your best day for habits is ${wd}.` : ''}`.trim()} />
+          <Cap text={locked ? 'Streaks and days written will show here.' : `${avg} ${wd ? `Your best day for habits is ${wd}.` : ''}`.trim()} />
         </div>
       </div>
       <div className="glass ic">
@@ -89,12 +101,12 @@ export function Insights({ today, first }: { today: string; first: string }) {
             {(g === 'month' ? years : months).map((v) => <option key={v} value={v}>{g === 'month' ? v : monthTitle(v)}</option>)}
           </select>
         </div>
-        <Cap cls="prompt" text={chartErr || (chartDays ? msg || `Habits done per ${g}.` : 'Loading…')} />
+        <Cap cls="prompt" text={locked ? 'Your habit chart will show here.' : chartErr || (chartDays ? msg || `Habits done per ${g}.` : 'Loading…')} />
         <div className="chart">
           <div className="yax" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
           <div className="ic-body hscroll">
             {bars.map((w) => (
-              <div key={w.start} className={`bar g-${g}`} tabIndex={0} data-tip={`${w.tip}: ${w.done} of ${w.poss} habit check-ins done (${w.p}%).${w.live ? ' Still in progress.' : ''}`}>
+              <div key={w.start} className={`bar g-${g}`} {...tip(`${w.tip}: ${w.done} of ${w.poss} habit check-ins done (${w.p}%).${w.live ? ' Still in progress.' : ''}`)}>
                 <span className="plot"><span className="fill" style={{ '--p': w.p } as React.CSSProperties} /></span>
                 <span className="lbl">{g !== 'day' || +w.label === 1 || +w.label % 5 === 0 || w.live ? w.label : ''}</span>
               </div>
@@ -104,12 +116,12 @@ export function Insights({ today, first }: { today: string; first: string }) {
       </div>
       <div className="glass ic">
         <div className="ic-head"><h2>Each habit</h2></div>
-        <Cap text="Last 30 days, and the longest streak ever." />
+        <Cap text={locked ? 'Each habit over the last 30 days will show here.' : 'Last 30 days, and the longest streak ever.'} />
         <div className="ic-body">
           {d.habits.map((h) => (
-            <div key={h.id} className="hrow" tabIndex={0} data-tip={`${h.name}: done ${h.done30} of the last ${h.span30} days. Current streak ${h.streak} days, best ${h.best_streak} days.`}>
-              <span>{h.name}</span><span className="muted small">{h.last30}% · best {h.best_streak} days</span>
-              <span className="meter" style={{ '--p': h.last30 } as React.CSSProperties}><i /></span>
+            <div key={h.id} className="hrow" {...tip(`${h.name}: done ${h.done30} of the last ${h.span30} days. Current streak ${h.streak} days, best ${h.best_streak} days.`)}>
+              <span>{h.name}</span><span className="muted small">{locked ? '–' : `${h.last30}% · best ${h.best_streak} days`}</span>
+              <span className="meter" style={{ '--p': locked ? 0 : h.last30 } as React.CSSProperties}><i /></span>
             </div>
           ))}
         </div>

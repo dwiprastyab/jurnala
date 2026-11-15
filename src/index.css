@@ -289,6 +289,9 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .btn.ib { width: 44px; height: 44px; min-height: 0; padding: 0; display: inline-grid; place-items: center; flex: none; }
 .btn.ib svg { width: 18px; height: 18px; }
 .btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#ins.locked .ic-filters { display: none; }
+#ins.locked .stat b, #ins.locked .chart, #ins.locked .hrow { opacity: .5; }
+#ins.locked .bar .fill { background: none; border: 1.5px dashed var(--muted); }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stat { padding: 6px 4px; text-align: center; display: grid; gap: 4px; align-content: start; }
 .stat b { display: block; font-family: var(--serif); font-weight: 400; font-size: 34px; line-height: 1.1; }
