@@ -43,7 +43,7 @@ Copy `design/scenes/*.svg` to `public/scenes/`. Do not edit the SVGs by hand.
 |---|---|
 | `--ink` | `#FBF7F0` |
 | `--muted` | `#ECE8F4` |
-| `--glass` | `rgb(20 16 48 / .40)`; day `rgb(20 16 56 / .55)`; dawn `rgb(20 16 56 / .46)` |
+| `--glass` | `rgb(20 16 48 / .40)`; day `rgb(20 16 56 / .68)`; dawn `rgb(20 16 56 / .54)` |
 | `--line` | `rgb(255 255 255 / .22)` |
 | `--field` | `rgb(255 255 255 / .10)` |
 | `--solid` (no-transparency fallback) | `#1F1B45` |
@@ -262,19 +262,13 @@ Legend worst: 7.32 (Classic dawn). Day numbers worst: 7.35 (Scenes dawn). No fix
 
 Not measured: the discard dialog, text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run), Insights, and widths other than 390 for History and Settings. The day sheet is a glass panel with the same tokens as the cards and was not measured separately.
 
-#### Prototype glass values vs build (2026-11-15) — OPEN, Owner decides
+#### Prototype glass values vs build (2026-11-15) — decided: build wins
 
-The prototype sets Scenes glass to day `.55` and dawn `.46`; the build uses `.68` and `.54` because of the contrast fix above. Worst-case method (all text hidden, lightest background pixel behind each text box on Today, ink `#FBF7F0` / muted `#ECE8F4`), same run for both:
+The prototype first set Scenes glass to day `.55` and dawn `.46`. Those fail 4.5:1; the Owner chose to keep the build values `.68` / `.54` and `design/mockup.html` was updated to match. Worst-case method (all text hidden, lightest background pixel behind each text box on Today, ink `#FBF7F0` / muted `#ECE8F4`), same run for both:
 
-| Scenes, Today | Prototype (.55 / .46) | Build (.68 / .54) |
+| Scenes, Today | Old prototype (.55 / .46) | Now (.68 / .54) |
 |---|---|---|
 | dawn 390 | 3.88 | 4.68 |
 | day 390 | 4.92 | 6.84 |
 | dawn 1440 | 4.30 | 5.05 |
 | day 1440 | 3.66 | 5.31 |
-
-The prototype values fail 4.5:1 in three of four runs, the build values pass. The build keeps `.68` / `.54` until the Owner decides; the glass row in the token table above lists the prototype values.
-
-## Copy
-
-All product copy is in `docs/PRD.md` and the mockup. Errors say what happened and what to do; they do not apologise.
