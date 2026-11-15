@@ -151,9 +151,9 @@ option { color: #2A2440; }
 .tool svg { width: 18px; height: 18px; }
 .rte { height: var(--h, clamp(64px, 11dvh, 112px)); max-height: calc(7 * 1.5em + 20px); overflow-y: auto; overflow-wrap: anywhere; white-space: pre-wrap; outline-offset: 0; }
 .rte[data-size="s"] { --h: clamp(48px, 7dvh, 72px); }
-.rte ul, .rte ol { margin: 0; padding-left: 1.4em; white-space: normal; }
-.rte ul { list-style: disc; }
-.rte ol { list-style: decimal; }
+.rte ul, .rte ol, .md ul, .md ol { margin: 0; padding-left: 1.4em; white-space: normal; }
+.rte ul, .md ul { list-style: disc; }
+.rte ol, .md ol { list-style: decimal; }
 .rte:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
 .rte:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .ed.ro .field { background: transparent; border-color: transparent; padding-left: 0; padding-right: 0; }

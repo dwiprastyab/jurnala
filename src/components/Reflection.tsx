@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { api, type Entry } from '../api'
 import { Cross, Pencil, Tick } from '../icons'
 import { MoodPicker } from './Mood'
+import { Editor } from './Rich'
 
 type Texts = { went_well: string; was_hard: string; tomorrow: string }
 const PROMPTS: [keyof Texts, string, string, boolean?][] = [
   ['went_well', 'What went well today?', 'A few words are enough.'],
-  ['was_hard', 'What was hard?', 'Write it down, then let it go.'],
-  ['tomorrow', 'One thing for tomorrow', 'Keep it small.', true],
+  ['was_hard', 'What was hard today?', 'Write it down, then let it go.'],
+  ['tomorrow', "What's one thing for tomorrow?", 'Keep it small.', true],
 ]
 const toTexts = (e: Entry | null): Texts => ({ went_well: e?.went_well ?? '', was_hard: e?.was_hard ?? '', tomorrow: e?.tomorrow ?? '' })
 
@@ -21,7 +22,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [asking, setAsking] = useState(false)
-  const first = useRef<HTMLTextAreaElement>(null)
+  const first = useRef<HTMLDivElement>(null)
   const btn = useRef<HTMLButtonElement>(null)
   const focus = useRef<'first' | 'btn' | null>(null)
   const saved = entry !== null
@@ -64,10 +65,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
           </fieldset>
         )}
         {PROMPTS.map(([k, q, ph, small], i) => (read && !t[k] ? null : (
-          <div className={`ed${read ? ' ro' : ''}`} key={k}>
-            <div className="ed-top"><span className="prompt" id={`q-${k}`}>{q}</span></div>
-            <textarea ref={i === 0 ? first : undefined} className="field rte" data-size={small ? 's' : undefined} aria-labelledby={`q-${k}`} placeholder={read ? '' : ph} readOnly={read} maxLength={4000} value={t[k]} onChange={(e) => setT({ ...t, [k]: e.target.value })} style={{ resize: 'none' }} />
-          </div>
+          <Editor key={k} id={k} label={q} value={t[k]} onChange={(v) => setT((o) => ({ ...o, [k]: v }))} readOnly={read} ph={read ? '' : ph} small={small} rteRef={i === 0 ? first : undefined} />
         )))}
       </div>
       {asking && (

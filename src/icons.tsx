@@ -28,3 +28,8 @@ const MEDALS: Record<number, string> = {
   180: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
 }
 export const Medal = ({ n }: { n: number }) => <Svg d={MEDALS[n]} />
+export const BoldIcon = () => <Svg d='<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>' />
+export const ItalicIcon = () => <Svg d='<path d="M19 4h-9M14 20H5M15 4 9 20"/>' />
+export const EmojiIcon = () => <Svg d='<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9.5h.01M15 9.5h.01"/>' />
+export const ExpandIcon = () => <Svg d='<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>' />
+export const CollapseIcon = () => <Svg d='<path d="M20 4l-6 6M14 10h6M14 10V4M4 20l6-6M10 14H4M10 14v6"/>' />
