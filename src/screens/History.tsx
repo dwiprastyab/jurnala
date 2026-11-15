@@ -41,9 +41,9 @@ to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o
 // wide: the day panel is a second card; it travels with the calendar, as in the prototype
 const sh = sheet.current, sr = sheetFrom.current
 if (sh && matchMedia(wideQuery).matches && sel) {
-if (view === 'cal') { sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o) }
+if (view === 'cal') { sh.style.transition = 'none'; sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o) }
 else if (sr) {
-Object.assign(sh.style, { position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', margin: '0' })
+Object.assign(sh.style, { transition: 'none', position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', margin: '0' })
 sh.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
 }
 }
@@ -60,6 +60,7 @@ return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEa
   const [n, setN] = useState(0) // bump to refetch the month
   const [wide, setWide] = useState(() => matchMedia(wideQuery).matches)
   const sheet = useRef<HTMLDialogElement>(null)
+  const shown = useRef<string | null>(null) // the day the panel last showed
 
   useEffect(() => {
     const q = matchMedia(wideQuery), on = () => setWide(q.matches)
@@ -92,7 +93,12 @@ return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEa
     const d = sheet.current
     if (!d) return
     if (!sel || (view !== 'cal' && leaving !== 'cal')) { if (d.open) d.close(); return }
-    if (d.open) return
+    const picked = shown.current !== sel; shown.current = sel
+    if (d.open) {
+      // another day picked while the panel is open: the content fades up, as in the prototype
+      if (picked && wide && !leaving && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: 'cubic-bezier(.22, 1, .36, 1)' })
+      return
+    }
     if (wide) d.open = true // not show(): it would pull focus off the grid
     else d.showModal()
   }, [sel, view, wide, leaving])
