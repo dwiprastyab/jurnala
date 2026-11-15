@@ -179,7 +179,7 @@ return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEa
         </div>
       ) : null}
 
-      <dialog key={wide ? 'panel' : 'modal'} className="glass" id="sheet" ref={sheet} aria-labelledby="sheet-date" onClose={() => setSel(null)}>
+      <dialog key={wide ? 'panel' : 'modal'} className="glass" id="sheet" ref={sheet} aria-labelledby="sheet-date" onClose={() => { if (view === 'cal') setSel(null) }}>
         {sel && <DaySheet key={sel} day={sel} onEdit={() => onEdit(sel)} onClose={() => sheet.current?.close()} />}
       </dialog>
 
