@@ -112,7 +112,7 @@ export function Insights({ today, first }: { today: string; first: string }) {
           {milestones(best).map((m) => (
             <span key={m.n} className="chip" tabIndex={0} data-got={m.reached || undefined} role="img" aria-label={`${m.n} days, ${m.reached ? 'reached' : `${m.left} to go`}`}
               data-tip={m.reached ? `Reached: your best streak hit ${m.n} days.` : `${m.left} more days of a streak to reach ${m.n}. Your best so far is ${best}.`}>
-              <span className="medal"><Medal n={m.n} /></span><span className="tx"><b>{m.n} days</b>{!m.reached && <span className="muted small"> · {m.left} to go</span>}</span>
+              <span className="medal"><Medal n={m.n} /></span><span className="tx"><b>{m.n} days</b></span>
             </span>
           ))}
         </div></div>

@@ -37,6 +37,7 @@ export default function App() {
   const t = useTheme()
   const [user, setUser] = useState<User | null | undefined>(undefined) // undefined = checking
   const [screen, setScreen] = useState<Screen>('today')
+  const [editDay, setEditDay] = useState<string | null>(null) // a past day opened from History, shown on Today
   const [mode, setMode] = useState<'off' | 'scene' | 'quote'>('off')
   const busy = useRef(false)
   const modeRef = useRef(mode)
@@ -70,13 +71,13 @@ export default function App() {
     await fly(false)
     busy.current = false
   }
-  async function go(s: Screen) {
+  async function go(s: Screen, day: string | null = null) {
     if (busy.current) return
     if (s === screen) return modeRef.current === 'off' ? enter('scene') : leave()
-    if (modeRef.current !== 'off') { flushSync(() => setMode('off')); scrollTo(0, 0); return setScreen(s) }
+    if (modeRef.current !== 'off') { flushSync(() => setMode('off')); scrollTo(0, 0); setEditDay(day); return setScreen(s) }
     busy.current = true
     const a = await fly(true)
-    flushSync(() => setScreen(s)); scrollTo(0, 0); a.forEach((x) => x.cancel())
+    flushSync(() => { setScreen(s); setEditDay(day) }); scrollTo(0, 0); a.forEach((x) => x.cancel())
     await fly(false)
     busy.current = false
   }
@@ -100,8 +101,8 @@ export default function App() {
       {user && <Nav screen={screen} current={mode !== 'quote'} onGo={go} onBrand={() => (mode === 'off' ? enter('quote') : mode === 'scene' ? setMode('quote') : undefined)} quote={mode === 'quote'} />}
       <main className="app">
         {user === undefined ? null : !user ? <SignIn onIn={(u) => { setScreen('today'); setUser(u) }} /> :
-          screen === 'today' ? <Today user={user} hour={t.hour} onGo={go} /> :
-          screen === 'history' ? <History user={user} /> :
+          screen === 'today' ? <Today key={editDay ?? 'now'} user={user} hour={t.hour} day={editDay} onGo={go} onBack={() => setEditDay(null)} /> :
+          screen === 'history' ? <History user={user} onEdit={(d) => go('today', d)} /> :
           screen === 'habits' ? <Habits /> :
           <Settings user={user} theme={t.theme} setTheme={t.setTheme} setting={t.setting} setSetting={t.setSetting} onSignOut={signOut} />}
       </main>

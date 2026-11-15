@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { api, type DayData, type HistoryDay, type User } from '../api'
-import { addDays, addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
-import { Chevron } from '../icons'
+import { addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
+import { Chevron, Cross, Pencil } from '../icons'
 import { MOODS } from '../mood'
-import { Reflection } from '../components/Reflection'
 import { Insights } from './Insights'
+import { Md } from '../components/Rich'
 
 const wideQuery = '(min-width:700px)'
 const col = (v: string) => ({ '--c': v }) as CSSProperties
 
-export function History({ user }: { user: User }) {
+export function History({ user, onEdit }: { user: User; onEdit: (day: string) => void }) {
   // shortcut: today is fixed while the screen is open; reload after midnight
   const [today] = useState(() => localDay())
   const first = user.created_at ? localDay(new Date(user.created_at)) : today
@@ -66,11 +66,6 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
 
   const minMonth = monthOf(first), maxMonth = monthOf(today)
   const goDay = useCallback((day: string) => { setSel(day); setMonth(monthOf(day)) }, [])
-  const stepDay = useCallback((by: number) => {
-    if (!sel) return
-    const t = addDays(sel, by)
-    if (t >= first && t <= today) goDay(t)
-  }, [sel, first, today, goDay])
 
   // The sheet is a modal on phones and a panel beside the grid from 700px.
   useEffect(() => {
@@ -85,13 +80,11 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (!sel || view !== 'cal' || e.defaultPrevented) return
-      const t = e.target as HTMLElement
       if (e.key === 'Escape' && wide) setSel(null)
-      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !t.closest('input, textarea, select, [contenteditable]')) stepDay(e.key === 'ArrowLeft' ? -1 : 1)
     }
     addEventListener('keydown', on)
     return () => removeEventListener('keydown', on)
-  }, [sel, view, wide, stepDay])
+  }, [sel, view, wide])
 
   const lead = weekdayMon(`${month}-01`)
   const cells = Array.from({ length: daysInMonth(month) }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`)
@@ -145,7 +138,7 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
                       data-pre={pre || undefined} data-future={future || undefined} data-full={full || undefined}
                       data-mood={mood ?? undefined} style={mood ? col(`var(--mood-${mood})`) : undefined}
                       aria-current={key === today ? 'date' : undefined} aria-pressed={key === sel}
-                      aria-label={`${longDateY(key)}${pre ? ', before you joined' : mood ? `, mood ${MOODS[mood - 1]}` : future ? '' : ', nothing saved'}`}
+                      aria-label={`${longDateY(key)}${pre ? ', before you joined' : mood ? `, ${MOODS[mood - 1]}, ${x!.done} of ${x!.total} habits done` : future ? '' : ', no reflection'}`}
                       onClick={() => setSel(key)}><i>{Number(key.slice(8))}</i></button>
                   )
                 })}
@@ -161,7 +154,7 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
       ) : null}
 
       <dialog className="glass" id="sheet" ref={sheet} aria-labelledby="sheet-date" onClose={() => setSel(null)}>
-        {sel && <DaySheet key={sel} day={sel} first={first} today={today} onStep={stepDay} onClose={() => sheet.current?.close()} onSaved={() => setN((v) => v + 1)} />}
+        {sel && <DaySheet key={sel} day={sel} onEdit={() => onEdit(sel)} onClose={() => sheet.current?.close()} />}
       </dialog>
 
       {(view === 'ins' || leaving === 'ins') && <Insights today={today} first={first} />}
@@ -169,14 +162,15 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
   )
 }
 
-function DaySheet({ day, first, today, onStep, onClose, onSaved }: { day: string; first: string; today: string; onStep: (n: number) => void; onClose: () => void; onSaved: () => void }) {
+function DaySheet({ day, onEdit, onClose }: { day: string; onEdit: () => void; onClose: () => void }) {
   const [d, setD] = useState<DayData | null>(null)
   const [err, setErr] = useState('')
-  const [writing, setWriting] = useState(false)
   const load = () => { setErr(''); api.day(day).then(setD, (e) => setErr(e.message)) }
   useEffect(load, [day]) // eslint-disable-line react-hooks/exhaustive-deps
-  const mood = d?.entry?.mood ?? null
+  const e = d?.entry, mood = e?.mood ?? null
   const done = d?.habits.filter((h) => h.done).length ?? 0
+  const sub = [mood ? `${MOODS[mood - 1]}.` : '', d?.habits.length ? (done === d.habits.length ? 'Every habit done.' : `${done} of ${d.habits.length} habits done.`) : ''].filter(Boolean).join(' ')
+  const answers: [string, string | null | undefined][] = [['What went well today?', e?.went_well], ['What was hard today?', e?.was_hard], ["What's one thing for tomorrow?", e?.tomorrow]]
 
   return (
     <>
@@ -184,29 +178,16 @@ function DaySheet({ day, first, today, onStep, onClose, onSaved }: { day: string
       {err && <p role="alert">{err} <button className="btn text" type="button" onClick={load}>Try again</button></p>}
       {!d && !err && <p className="muted" role="status">Loading…</p>}
       {d && (
-        <div className="stack">
-          <p className="muted" id="sheet-sub">
-            {mood ? `${MOODS[mood - 1]}. ` : ''}{d.habits.length ? (done === d.habits.length ? 'Every habit done.' : `${done} of ${d.habits.length} habits done.`) : ''}
-          </p>
-          {d.habits.length > 0 && (
-            <dl id="sheet-body">
-              {d.habits.map((h) => <div key={h.id} className="row"><dt>{h.name}</dt><dd>{h.done ? 'done' : 'not done'}</dd></div>)}
-            </dl>
-          )}
-          {d.entry || writing ? (
-            <Reflection bare day={day} entry={d.entry} title="Reflection" onSaved={(entry) => { setD({ ...d, entry }); onSaved() }} />
-          ) : (
-            <>
-              <p className="muted">Nothing saved for this day.</p>
-              <button className="btn" type="button" onClick={() => setWriting(true)}>Write about this day</button>
-            </>
-          )}
-        </div>
+        <>
+          <p className="muted" id="sheet-sub">{e ? sub : ['Nothing saved for this day.', sub].filter(Boolean).join(' ')}</p>
+          <dl id="sheet-body">
+            {answers.filter(([, v]) => v).map(([q, v]) => <Fragment key={q}><dt>{q}</dt><dd><Md text={v!} /></dd></Fragment>)}
+          </dl>
+        </>
       )}
       <div className="row" style={{ marginTop: 20 }}>
-        <button className="btn quiet" type="button" disabled={day <= first} onClick={() => onStep(-1)}>Previous day</button>
-        <button className="btn quiet" type="button" disabled={day >= today} onClick={() => onStep(1)}>Next day</button>
-        <button className="btn quiet" id="sheet-close" type="button" onClick={onClose}>Close</button>
+        <button className="btn ib" type="button" data-tip="Edit this day" aria-label="Edit this day" onClick={onEdit}><Pencil /></button>
+        <button className="btn quiet ib" id="sheet-close" type="button" data-tip="Close" aria-label="Close" onClick={onClose}><Cross /></button>
       </div>
     </>
   )

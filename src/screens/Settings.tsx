@@ -52,7 +52,6 @@ export function Settings({ user, theme, setTheme, setting, setSetting, onSignOut
             <option value="night">Night 19–05</option>
           </select>
         </label>
-        <p className="muted small">Auto follows your clock. Saved on this device.</p>
         <hr />
         <div>
           <h2>Your data</h2>

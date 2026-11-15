@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, type DayData, type User } from '../api'
-import { Check, Gear } from '../icons'
+import { Back, Check, Gear } from '../icons'
 import { localDay, longDate } from '../day'
 import { greetFor } from '../theme'
 import { Reflection } from '../components/Reflection'
 import { cheerForMood, cheerForTick, cheerOnOpen } from '../cheer'
 
-export function Today({ user, hour, onGo }: { user: User; hour: number; onGo: (s: 'settings') => void }) {
+export function Today({ user, hour, day: past, onGo, onBack }: { user: User; hour: number; day: string | null; onGo: (s: 'settings') => void; onBack: () => void }) {
   // shortcut: the day is fixed when the screen opens; reload the page after midnight, upgrade when it matters
-  const [day] = useState(() => localDay())
+  const [today] = useState(() => localDay())
+  const day = past ?? today
   const [d, setD] = useState<DayData | null>(null)
   const [err, setErr] = useState('')
 
@@ -17,7 +18,7 @@ export function Today({ user, hour, onGo }: { user: User; hour: number; onGo: (s
   const say = (m: string) => { clearTimeout(cheerTimer.current); setCheer(m); if (m) cheerTimer.current = window.setTimeout(() => setCheer(''), 8000) }
   useEffect(() => () => clearTimeout(cheerTimer.current), [])
 
-  const load = useCallback(() => { setErr(''); api.day(day).then((r) => { setD(r); say(cheerOnOpen(r)) }, (e) => setErr(e.message)) }, [day])
+  const load = useCallback(() => { setErr(''); api.day(day).then((r) => { setD(r); say(past ? '' : cheerOnOpen(r)) }, (e) => setErr(e.message)) }, [day, past])
   useEffect(load, [load])
 
   async function tick(id: number) {
@@ -37,9 +38,10 @@ export function Today({ user, hour, onGo }: { user: User; hour: number; onGo: (s
     <section className="screen today">
       <div className="head">
         <div>
-          <h1 id="greeting">{greetFor(hour)}, {user.name}</h1>
-          <p className="muted" id="date">{longDate(day)}</p>
+          <h1 id="greeting">{past ? longDate(day) : `${greetFor(hour)}, ${user.name}`}</h1>
+          <p className="muted" id="date">{past ? 'You are editing a past day.' : longDate(day)}</p>
         </div>
+        {past && <button className="btn quiet ib" type="button" data-tip="Back to today" aria-label="Back to today" onClick={onBack}><Back /></button>}
         <button className="icon-btn gear" type="button" aria-label="Settings" onClick={() => onGo('settings')}><Gear /></button>
       </div>
       {err && <p className="glass" role="alert">{err} <button className="btn text" type="button" onClick={load}>Try again</button></p>}
