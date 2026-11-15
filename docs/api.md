@@ -104,7 +104,7 @@ Inclusive range, at most 42 days, `from` ≤ `to`; otherwise `400 {"error":"Pick
 - `done` counts check-ins for habits active now; `total` is the number of habits active now. The UI draws the ring when `total > 0 && done === total`. (Known shortcut in the PRD.)
 
 ### `GET /api/insights?today=YYYY-MM-DD`
-`today` is the browser's local date (same validation as `day`). One call feeds the whole Insights view; the browser derives week bars, messages, the best weekday and milestones from it.
+`today` is the browser's local date (same validation as `day`). One call feeds the whole Insights view; the browser derives the best weekday, the This month stats and milestones from it. The Habits-over-time bars (Day, Week or Month, any period since sign-up) come from `GET /api/history` called in chunks of up to 42 days, because that card can show any month or year.
 ```json
 {
   "entries": 41,

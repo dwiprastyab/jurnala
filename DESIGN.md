@@ -155,9 +155,9 @@ Navigation changes per width; see Layouts.
 
 Four glass cards (one column on phone; two columns from 700px, the same width as the two-column Today). Numbers are always written; bar height and colour never carry a value alone.
 - **This month**: three stats (current streak, best streak, days written) in Newsreader numerals over a muted caption, then the average-mood line and, from 28 days of data, the best-weekday sentence.
-- Each card has a fixed header (title, plus a month filter on Week by week) and a body that scrolls inside the card, so the Insights page itself does not scroll from 700px.
+- Each card has a fixed header (title, plus the Day | Week | Month switch and the Period select on Habits over time) and a body that scrolls inside the card, so the Insights page itself does not scroll from 700px.
 - Every item (stat, bar, habit row, milestone chip) is focusable and, on hover, focus or tap, rewrites its card's caption line (`.cap`) with a detail sentence; leaving restores the default caption. Details live in `data-tip`, not in the DOM tooltip.
-- **Week by week** (titled `Habits over time`): every week since sign-up, bars up to 36px wide scrolling sideways (right-aligned, starts at the newest). A Y axis (`100%`, `50%`, `0%`) with three faint gridlines replaces the percentage written above each bar. The exact figure appears in the card's caption line and in a small blurred tooltip on hover, focus or tap. Month filter (`All weeks` or a month).
+- **Habits over time**: a `Day | Week | Month` group (`seg sm`) and a `Period` select. Day and Week show one month (a week belongs to the month of its Monday); Month shows one year. Bars up to 36px wide scrolling sideways (right-aligned, starts at the newest). A Y axis (`100%`, `50%`, `0%`) with three faint gridlines replaces the percentage written above each bar. The exact figure appears in the card's caption line and in a small blurred tooltip on hover, focus or tap.
 - **Each habit**: name, `87% · best 14 days`, a thin meter; list scrolls vertically.
 - **Milestones**: 7, 14, 30, 60, 100, 180, 365 days; reached ones show a medal icon (SVG, not emoji), the others read `30 days · 14 to go`; list scrolls vertically.
 - **Switching** Calendar ↔ Insights slides the pane (and the open day card) sideways; reduced motion: instant.

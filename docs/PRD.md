@@ -77,8 +77,8 @@ Add, rename, reorder by drag and drop (or Arrow Up/Down on the grip), archive. A
 ### 7. Insights (second view in History)
 History has a `Calendar | Insights` switch. Insights shows only after 7 or more days with an entry; before that: `Insights appear after a week of entries.` Four cards:
 - **This month**: current streak, best streak, days written, average mood; and, from 28 days of data, `Your best day for habits is Monday.`
-- **Habits over time** (week by week): share of habits done per week (Monday to Sunday), every week since sign-up, as bars on a 0–100% axis; the exact percentage shows on hover, focus or tap (and in the caption line), plus the weekly message (feature 8). The newest bar is this week so far.
-- **Each habit**: last-30-day percentage with a meter, and best streak ever.
+- **Habits over time**: share of habits done, as bars on a 0–100% axis. A `Day | Week | Month` switch picks the bar size, and a `Period` select picks what to show: Day and Week show one calendar month (a week belongs to the month of its Monday), Month shows one year. The select lists sign-up to now, newest first. The exact percentage shows on hover, focus or tap (and in the caption line), plus a message about the finished bars (feature 8, with "day", "week" or "month" in the wording). The newest bar is the current period so far and is not counted in the message.
+- **Each habit**: last-30-day percentage with a meter (a habit younger than 30 days is counted from its first day, so `done of the last N days` uses N under 30), and best streak ever.
 - **Milestones**: 7, 14, 30, 60, 100, 180 and 365 days of best streak, a medal icon when reached, or `30 days · 14 to go`.
 Numbers are always written out; colour or bar height is never the only signal. The 80% and 50% thresholds below are proposals, to be tuned after real use.
 
@@ -97,13 +97,13 @@ No points, levels, XP, confetti or sound, and the app never blames the user. Str
 | Saving a day with mood Rough or Low | `A hard day still counts. Be kind to yourself.` |
 | A streak of 3 or more just ended | `The streak ended, but you didn't. Tomorrow we start again, a little wiser.` |
 | Opening the app after 2 or more days away | `Welcome back. That's the hardest step.` |
-| Last complete week 100% | `A perfect week. Well earned.` |
-| 2 weeks in a row at 80% or more | `Two good weeks in a row. The pattern is forming.` |
-| 4 weeks in a row at 80% or more | `Four weeks of steady effort. Be proud of that.` |
-| Last complete week under 50% | `A slow week happens. Don't lose heart. Tomorrow we build a better day.` |
-| Last complete week 50–79%, or one good week (my additions, not yet approved) | `A steady week. Every bit counts.` / `A good week. Keep it going.` |
+| Last finished bar 100% | `A perfect week. Well earned.` ("day" or "month" when grouped that way) |
+| 2 bars in a row at 80% or more | `Two good weeks in a row. The pattern is forming.` |
+| 4 bars in a row at 80% or more | `Four weeks of steady effort. Be proud of that.` |
+| Last finished bar under 50% | `A slow week happens. Don't lose heart. Tomorrow we build a better day.` |
+| Last finished bar 50–79%, or one good bar (my additions, not yet approved) | `A steady week. Every bit counts.` / `A good week. Keep it going.` |
 
-One line at a time, shown once per trigger. Messages on Today fade after 8 seconds; weekly messages live in Insights.
+One line at a time, shown once per trigger. Messages on Today fade after 8 seconds; the period message lives in Insights.
 
 ### 9. Background by time of day
 Every screen sits on a full-screen vector scene that follows the local clock: dawn 05–09 (sun over mountains), day 09–16 (city), dusk 16–19 (sunset over the sea), night 19–05 (Milky Way over a hill above a city). The scene is fixed; content scrolls over it. Scenes animate gently (clouds, stars, water, window lights) and stop entirely for `prefers-reduced-motion`. Changing phase cross-fades over 1.2 s. The greeting follows the same clock: morning = dawn, afternoon = day, evening = dusk and night. Visual rules: `DESIGN.md`. Assets: `design/scenes/`.

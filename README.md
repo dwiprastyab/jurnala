@@ -16,7 +16,7 @@ All product copy is English.
 | **Today** | A greeting that follows the local time, yesterday's "one thing for tomorrow" shown back to you, your active habits with streaks (one tap to tick), and the reflection card. |
 | **Reflection** | Four prompts, always in this order: mood on a 5-face scale, `What went well today?`, `What was hard?`, `One thing for tomorrow`. All optional, at least one required. One per day, past days editable. Read mode and edit mode. |
 | **History** | A month calendar (weeks start Monday) coloured by mood, with a dot on days where every habit was done. A day sheet shows the habits and the reflection. A picker jumps to any month or day since sign-up. |
-| **Insights** | After 7 days with an entry: this month's streaks and average mood, habits week by week, a per-habit 30-day rate, and milestones (7 to 365 days). |
+| **Insights** | After 7 days with an entry: this month's streaks and average mood, habits over time by day, week or month, a per-habit 30-day rate, and milestones (7 to 365 days). |
 | **Habits** | Add, rename, drag to reorder, archive. Max 12 active, names up to 60 characters. The only way to delete is `Delete permanently` on an already archived habit, after a confirmation. |
 | **Encouragement** | Plain text only. No points, XP, confetti or sound, and the app never blames you. Examples: `A start is the hardest part. You made it.` |
 | **Settings** | Background (`Scenes` or `Classic`), a time-of-day preview, `Export my data (CSV)`, and `Sign out`. |
