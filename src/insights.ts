@@ -55,11 +55,12 @@ export function bestWeekday(days: HistoryDay[], today: string, habitCount: numbe
   return best < 0 ? null : weekdayName(addDays(mondayOf(today), best))
 }
 
-/** Days written this month (a day with a mood) and the average mood, 1 to 5. shortcut: a reflection with texts but no mood is not counted, the API does not say. */
+/** Days written this month (any reflection, mood or not) and the average mood, 1 to 5, over days that have a mood. */
 export function monthStats(days: HistoryDay[], today: string) {
-  const ms = days.filter((d) => d.day.slice(0, 7) === today.slice(0, 7) && d.mood !== null)
+  const mo = days.filter((d) => d.day.slice(0, 7) === today.slice(0, 7))
+  const ms = mo.filter((d) => d.mood !== null)
   const sum = ms.reduce((s, d) => s + (d.mood as number), 0)
-  return { wrote: ms.length, dayOfMonth: Number(today.slice(8)), avgMood: ms.length ? Math.round(sum / ms.length) : null }
+  return { wrote: mo.filter((d) => d.entry).length, dayOfMonth: Number(today.slice(8)), avgMood: ms.length ? Math.round(sum / ms.length) : null }
 }
 
 export const streakStats = (habits: InsightsData['habits']) => ({

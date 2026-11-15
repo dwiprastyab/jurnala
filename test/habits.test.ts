@@ -97,10 +97,10 @@ it('check-in: idempotent, returns the streak for that day, untick lowers it', as
 	const a = ((await (await call('POST', '/api/habits', { name: 'A' })).json()) as any).habit.id
 	for (const d of ['2026-11-12', '2026-11-13']) await call('PUT', `/api/checkins/${a}/${d}`, { done: true })
 	const r1 = await call('PUT', `/api/checkins/${a}/2026-11-14`, { done: true })
-	expect(await r1.json()).toEqual({ habit_id: a, day: '2026-11-14', done: true, streak: 3 })
+	expect(await r1.json()).toEqual({ habit_id: a, day: '2026-11-14', done: true, streak: 3, first: false })
 	expect(((await (await call('PUT', `/api/checkins/${a}/2026-11-14`, { done: true })).json()) as any).streak).toBe(3)
 	const r2 = await call('PUT', `/api/checkins/${a}/2026-11-14`, { done: false })
-	expect(await r2.json()).toEqual({ habit_id: a, day: '2026-11-14', done: false, streak: 2 })
+	expect(await r2.json()).toEqual({ habit_id: a, day: '2026-11-14', done: false, streak: 2, first: false })
 })
 
 it('check-in validation: bad day 400, future day 400, bad body 400, unknown habit 404', async () => {
@@ -113,4 +113,13 @@ it('check-in validation: bad day 400, future day 400, bad body 400, unknown habi
 	}
 	expect((await call('PUT', `/api/checkins/${a}/2026-11-14`, { done: 'yes' })).status).toBe(400)
 	expect((await call('PUT', '/api/checkins/99999/2026-11-14', { done: true })).status).toBe(404)
+})
+
+it('check-in: `first` is true only for the very first check-in ever', async () => {
+	const { call } = await signIn('a@x.test')
+	const a = ((await (await call('POST', '/api/habits', { name: 'A' })).json()) as any).habit.id
+	const put = async (d: string, done = true) => ((await (await call('PUT', `/api/checkins/${a}/${d}`, { done })).json()) as any).first
+	expect(await put('2026-11-13')).toBe(true)
+	expect(await put('2026-11-14')).toBe(false)
+	expect(await put('2026-11-14', false)).toBe(false)
 })

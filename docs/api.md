@@ -53,7 +53,7 @@ Body with any of `{"name":"…","sort":2,"archived":true}`.
 
 ### `PUT /api/checkins/:habitId/:day`
 Body `{"done":true}`. Idempotent.
-- `200 {"habit_id":3,"day":"2026-11-14","done":true,"streak":12}` where `streak` follows the PRD rule, counted for that day.
+- `200 {"habit_id":3,"day":"2026-11-14","done":true,"streak":12,"first":false}` where `streak` follows the PRD rule, counted for that day. `first` is `true` only when this ticked check-in is the user's only check-in ever (drives the first-check-in line).
 - `DELETE /api/habits/:id` → `204`. Only for an archived habit; an active one → `409` `Archive this habit first.`. Deletes the habit and all its check-ins. Not undoable. `404` when not the caller's.
 - `GET /api/habits?archived=1` → the caller's archived habits (for the Archived list and Restore).
 - `404` when the habit is not the caller's. Check-ins for an archived habit → `404` too.
@@ -78,14 +78,17 @@ Body `{"mood":4,"went_well":"…","was_hard":"…","tomorrow":"…"}`; any field
 ```json
 {
   "day": "2026-11-14",
-  "habits": [{"id":3,"name":"Read","done":true,"streak":12}],
+  "habits": [{"id":3,"name":"Read","done":true,"streak":12,"prev_streak":0}],
   "entry": null,
-  "yesterday_tomorrow": "Call Mom"
+  "yesterday_tomorrow": "Call Mom",
+  "last_active": "2026-11-12"
 }
 ```
 - `habits`: active habits in `sort` order. `streak` is counted for that day.
 - `entry`: the entry object above, or `null` if nothing is saved.
 - `yesterday_tomorrow`: the previous day's `tomorrow` text, or `null`.
+- `prev_streak`: when the habit is not done that day and its streak is 0 (the day before was missed), the length of the run that ended just before it; else `0`. Feeds the `streak ended` line (3 or more).
+- `last_active`: latest day before `day` with a check-in or a saved reflection, or `null`. Feeds the `welcome back` line (2 or more full days away).
 
 ## History
 
@@ -93,11 +96,11 @@ Body `{"mood":4,"went_well":"…","was_hard":"…","tomorrow":"…"}`; any field
 Inclusive range, at most 42 days, `from` ≤ `to`; otherwise `400 {"error":"Pick a range of up to 6 weeks."}`.
 ```json
 {
-  "days": [{"day":"2026-11-13","mood":4,"done":3,"total":3}]
+  "days": [{"day":"2026-11-13","mood":4,"entry":true,"done":3,"total":3}]
 }
 ```
 - One item per day that has an entry or at least one check-in. Missing days mean "nothing saved".
-- `mood` is `null` when the day has check-ins but no entry mood.
+- `mood` is `null` when the day has check-ins but no entry mood. `entry` is `true` when a reflection exists (with or without a mood).
 - `done` counts check-ins for habits active now; `total` is the number of habits active now. The UI draws the ring when `total > 0 && done === total`. (Known shortcut in the PRD.)
 
 ### `GET /api/insights?today=YYYY-MM-DD`
@@ -105,13 +108,13 @@ Inclusive range, at most 42 days, `from` ≤ `to`; otherwise `400 {"error":"Pick
 ```json
 {
   "entries": 41,
-  "days": [{"day":"2026-11-13","mood":4,"done":3,"total":3}],
-  "habits": [{"id":3,"name":"Read","last30":87,"best_streak":14,"streak":5}]
+  "days": [{"day":"2026-11-13","mood":4,"entry":true,"done":3,"total":3}],
+  "habits": [{"id":3,"name":"Read","last30":87,"done30":26,"span30":30,"best_streak":14,"streak":5}]
 }
 ```
 - `entries`: count of days with a saved reflection, all time (the browser shows the empty state under 7).
 - `days`: the 84 days ending on `today`, same item shape and rules as `/api/history` (missing day = nothing saved). 84 days covers 8 weeks plus the 12-week best-weekday sentence.
-- `habits`: active habits in `sort` order. `last30` is the percent (0–100, rounded) of the 30 days ending on `today` with a check-in, counting only days on or after the habit's `created_at`; `best_streak` is the longest run of consecutive check-in days ever; `streak` is the current one (same rule as `/api/day`).
+- `habits`: active habits in `sort` order. `last30` is the percent (0–100, rounded) of the 30 days ending on `today` with a check-in, counting only days on or after the habit's `created_at`; `done30` and `span30` are the numerator and denominator behind it (`span30` is under 30 for a habit younger than 30 days: the window starts on the later of today−29 and the habit's creation day); `best_streak` is the longest run of consecutive check-in days ever; `streak` is the current one (same rule as `/api/day`).
 - Free-plan check (B6): one user, 12 habits, 3 years of data is about 13,000 check-in rows. Compute `best_streak` in SQL or one pass over `(habit_id, day)` ordered rows; if CPU time is a problem, cap the scan at the last 400 days and say so here.
 
 ## Export

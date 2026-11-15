@@ -212,7 +212,21 @@ export async function countEntries(db: D1Database, userId: number): Promise<numb
 export interface DayRow {
 	day: string
 	mood: number | null
+	entry: number
 	done: number
+}
+
+export async function countCheckins(db: D1Database, userId: number): Promise<number> {
+	return (await db.prepare('SELECT COUNT(*) AS n FROM checkins WHERE user_id = ?').bind(userId).first<{ n: number }>())?.n ?? 0
+}
+
+// Latest day before `day` with a check-in or a saved reflection, or null. Feeds the "welcome back" line.
+export async function lastActiveBefore(db: D1Database, userId: number, day: string): Promise<string | null> {
+	const r = await db
+		.prepare('SELECT MAX(d) AS d FROM (SELECT MAX(day) AS d FROM checkins WHERE user_id = ?1 AND day < ?2 UNION ALL SELECT MAX(day) FROM entries WHERE user_id = ?1 AND day < ?2)')
+		.bind(userId, day)
+		.first<{ d: string | null }>()
+	return r?.d ?? null
 }
 
 // One row per day (inclusive range) that has an entry or at least one check-in. `done` counts check-ins of habits active now.
@@ -220,7 +234,7 @@ export const historyRows = async (db: D1Database, userId: number, from: string, 
 	(
 		await db
 			.prepare(
-				`SELECT d.day AS day, e.mood AS mood,
+				`SELECT d.day AS day, e.mood AS mood, (e.day IS NOT NULL) AS entry,
 				   (SELECT COUNT(*) FROM checkins c JOIN habits h ON h.id = c.habit_id AND h.user_id = ?1 AND h.archived_at IS NULL
 				    WHERE c.user_id = ?1 AND c.day = d.day) AS done
 				 FROM (SELECT day FROM entries WHERE user_id = ?1 AND day BETWEEN ?2 AND ?3

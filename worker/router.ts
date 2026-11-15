@@ -116,7 +116,8 @@ async function putCheckin(c: Ctx, habitId: string, day: string): Promise<Respons
 	const habit = await db.getHabit(env.DB, user.id, id)
 	if (!habit || habit.archived_at !== null) return NOT_FOUND()
 	await db.setCheckin(env.DB, user.id, id, day, body.done)
-	return json({ habit_id: id, day, done: body.done, streak: streak(await db.checkinDays(env.DB, user.id, id, day), day) })
+	const first = body.done && (await db.countCheckins(env.DB, user.id)) === 1 // the user's one and only check-in: drives the "first check-in" line
+	return json({ habit_id: id, day, done: body.done, streak: streak(await db.checkinDays(env.DB, user.id, id, day), day), first })
 }
 
 const TEXT_FIELDS = ['went_well', 'was_hard', 'tomorrow'] as const
@@ -144,22 +145,25 @@ async function dayView(c: Ctx, day: string): Promise<Response> {
 	if (!validDay(day)) return BAD_DAY()
 	const { DB } = c.env
 	const uid = c.user.id
-	const [habits, days, entry, prev] = await Promise.all([db.listHabits(DB, uid), db.checkinDaysByHabit(DB, uid, day), db.getEntry(DB, uid, day), db.getEntry(DB, uid, addDays(day, -1))])
+	const [habits, days, entry, prev, lastActive] = await Promise.all([db.listHabits(DB, uid), db.checkinDaysByHabit(DB, uid, day), db.getEntry(DB, uid, day), db.getEntry(DB, uid, addDays(day, -1)), db.lastActiveBefore(DB, uid, day)])
 	return json({
 		day,
 		habits: habits.map((h) => {
 			const ds = days.get(h.id) ?? []
-			return { id: h.id, name: h.name, done: ds.includes(day), streak: streak(ds, day) }
+			const done = ds.includes(day), st = streak(ds, day)
+			// prev_streak: length of a streak that just ended (yesterday was missed), else 0
+			return { id: h.id, name: h.name, done, streak: st, prev_streak: !done && st === 0 ? streak(ds, addDays(day, -1)) : 0 }
 		}),
 		entry,
 		yesterday_tomorrow: prev?.tomorrow ?? null,
+		last_active: lastActive,
 	})
 }
 
 // shortcut: `total` and `done` compare to habits active now, not on that day; upgrade if it confuses the Owner
 async function dayRows(c: Ctx, from: string, to: string) {
 	const [rows, total] = await Promise.all([db.historyRows(c.env.DB, c.user.id, from, to), db.countActiveHabits(c.env.DB, c.user.id)])
-	return rows.map((r) => ({ day: r.day, mood: r.mood, done: r.done, total }))
+	return rows.map((r) => ({ day: r.day, mood: r.mood, entry: !!r.entry, done: r.done, total }))
 }
 
 async function history(c: Ctx): Promise<Response> {
@@ -191,7 +195,7 @@ async function insights(c: Ctx): Promise<Response> {
 			const start = created.get(h.id)! > windowStart ? created.get(h.id)! : windowStart
 			const span = Math.max(daysBetween(start, today) + 1, 1)
 			const hits = ds.filter((d) => d >= start).length
-			return { id: h.id, name: h.name, last30: Math.min(100, Math.round((100 * hits) / span)), best_streak: bestStreak(ds), streak: streak(ds, today) }
+			return { id: h.id, name: h.name, last30: Math.min(100, Math.round((100 * hits) / span)), done30: hits, span30: span, best_streak: bestStreak(ds), streak: streak(ds, today) }
 		}),
 	})
 }

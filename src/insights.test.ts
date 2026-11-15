@@ -3,7 +3,7 @@ import { addDays } from './day'
 import { bestWeekday, milestones, monthStats, pct, streakStats, weekBars, weekMessage } from './insights'
 
 const today = '2026-11-15' // a Sunday
-const day = (d: string, done = 0, mood: number | null = 3) => ({ day: d, mood, done, total: 4 })
+const day = (d: string, done = 0, mood: number | null = 3, entry = false) => ({ day: d, mood, entry: mood !== null || entry, done, total: 4 })
 
 describe('weekMessage', () => {
   it.each([
@@ -45,11 +45,11 @@ describe('bestWeekday', () => {
 
 describe('monthStats, streakStats, milestones, pct', () => {
   it('averages mood this month only', () => {
-    const r = monthStats([day('2026-11-01', 0, 5), day('2026-11-02', 0, 4), day('2026-10-31', 0, 1), day('2026-11-03', 2, null)], today)
-    expect(r).toEqual({ wrote: 2, dayOfMonth: 15, avgMood: 5 }) // 4.5 rounds to 5
+    const r = monthStats([day('2026-11-01', 0, 5), day('2026-11-02', 0, 4), day('2026-10-31', 0, 1), day('2026-11-03', 2, null), day('2026-11-04', 0, null, true)], today)
+    expect(r).toEqual({ wrote: 3, dayOfMonth: 15, avgMood: 5 }) // 4.5 rounds to 5
   })
   it('streaks take the best habit', () => {
-    expect(streakStats([{ id: 1, name: 'a', last30: 0, best_streak: 9, streak: 2 }, { id: 2, name: 'b', last30: 0, best_streak: 4, streak: 3 }])).toEqual({ current: 3, best: 9 })
+    expect(streakStats([{ id: 1, name: 'a', last30: 0, done30: 0, span30: 30, best_streak: 9, streak: 2 }, { id: 2, name: 'b', last30: 0, done30: 0, span30: 30, best_streak: 4, streak: 3 }])).toEqual({ current: 3, best: 9 })
     expect(streakStats([])).toEqual({ current: 0, best: 0 })
   })
   it('milestones', () => {

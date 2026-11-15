@@ -1,10 +1,10 @@
 export type User = { name: string; email: string; created_at?: string }
 export type Habit = { id: number; name: string; sort: number }
-export type DayHabit = { id: number; name: string; done: boolean; streak: number }
+export type DayHabit = { id: number; name: string; done: boolean; streak: number; prev_streak: number }
 export type Entry = { day: string; mood: number | null; went_well: string | null; was_hard: string | null; tomorrow: string | null; updated_at: string }
-export type DayData = { day: string; habits: DayHabit[]; entry: Entry | null; yesterday_tomorrow: string | null }
-export type HistoryDay = { day: string; mood: number | null; done: number; total: number }
-export type InsightsData = { entries: number; days: HistoryDay[]; habits: { id: number; name: string; last30: number; best_streak: number; streak: number }[] }
+export type DayData = { day: string; habits: DayHabit[]; entry: Entry | null; yesterday_tomorrow: string | null; last_active: string | null }
+export type HistoryDay = { day: string; mood: number | null; entry: boolean; done: number; total: number }
+export type InsightsData = { entries: number; days: HistoryDay[]; habits: { id: number; name: string; last30: number; done30: number; span30: number; best_streak: number; streak: number }[] }
 export type EntryInput = { mood: number | null; went_well: string; was_hard: string; tomorrow: string }
 
 export class ApiError extends Error {
@@ -44,7 +44,7 @@ export const api = {
   addHabit: (name: string) => call<{ habit: Habit }>('POST', '/habits', { name }),
   patchHabit: (id: number, patch: { name?: string; sort?: number; archived?: boolean }) => call<{ habit: Habit }>('PATCH', `/habits/${id}`, patch),
   deleteHabit: (id: number) => call<void>('DELETE', `/habits/${id}`),
-  checkin: (id: number, day: string, done: boolean) => call<{ habit_id: number; day: string; done: boolean; streak: number }>('PUT', `/checkins/${id}/${day}`, { done }),
+  checkin: (id: number, day: string, done: boolean) => call<{ habit_id: number; day: string; done: boolean; streak: number; first: boolean }>('PUT', `/checkins/${id}/${day}`, { done }),
   day: (day: string) => call<DayData>('GET', `/day/${day}`),
   saveEntry: (day: string, e: EntryInput) => call<{ entry: Entry }>('PUT', `/entries/${day}`, e),
   history: (from: string, to: string) => call<{ days: HistoryDay[] }>('GET', `/history?from=${from}&to=${to}`),

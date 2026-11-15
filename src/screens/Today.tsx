@@ -4,20 +4,21 @@ import { Check, Gear } from '../icons'
 import { localDay, longDate } from '../day'
 import { greetFor } from '../theme'
 import { Reflection } from '../components/Reflection'
-import { cheerForMood, cheerForTick } from '../cheer'
+import { cheerForMood, cheerForTick, cheerOnOpen } from '../cheer'
 
 export function Today({ user, hour, onGo }: { user: User; hour: number; onGo: (s: 'settings') => void }) {
   // shortcut: the day is fixed when the screen opens; reload the page after midnight, upgrade when it matters
   const [day] = useState(() => localDay())
   const [d, setD] = useState<DayData | null>(null)
   const [err, setErr] = useState('')
-  const load = useCallback(() => { setErr(''); api.day(day).then(setD, (e) => setErr(e.message)) }, [day])
-  useEffect(load, [load])
 
   const [cheer, setCheer] = useState('')
   const cheerTimer = useRef(0)
   const say = (m: string) => { clearTimeout(cheerTimer.current); setCheer(m); if (m) cheerTimer.current = window.setTimeout(() => setCheer(''), 8000) }
   useEffect(() => () => clearTimeout(cheerTimer.current), [])
+
+  const load = useCallback(() => { setErr(''); api.day(day).then((r) => { setD(r); say(cheerOnOpen(r)) }, (e) => setErr(e.message)) }, [day])
+  useEffect(load, [load])
 
   async function tick(id: number) {
     if (!d) return
@@ -26,7 +27,7 @@ export function Today({ user, hour, onGo }: { user: User; hour: number; onGo: (s
     set(!h.done, h.streak)
     try {
       const r = await api.checkin(id, day, !h.done); set(r.done, r.streak)
-      say(cheerForTick(r.done, r.streak, d.habits.every((x) => (x.id === id ? r.done : x.done))))
+      say(cheerForTick(r.done, r.streak, d.habits.every((x) => (x.id === id ? r.done : x.done)), r.first))
     }
     catch (e) { set(h.done, h.streak); setErr((e as Error).message) }
   }

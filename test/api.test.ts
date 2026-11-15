@@ -77,9 +77,9 @@ it('GET history: shape, omits empty days, mood null without entry, total is acti
 	const h = await j(await call('GET', '/api/history?from=2026-11-01&to=2026-11-30'))
 	expect(h).toEqual({
 		days: [
-			{ day: '2026-11-10', mood: null, done: 0, total: 2 },
-			{ day: '2026-11-13', mood: 4, done: 2, total: 2 },
-			{ day: '2026-11-14', mood: null, done: 1, total: 2 },
+			{ day: '2026-11-10', mood: null, entry: true, done: 0, total: 2 },
+			{ day: '2026-11-13', mood: 4, entry: true, done: 2, total: 2 },
+			{ day: '2026-11-14', mood: null, entry: false, done: 1, total: 2 },
 		],
 	})
 })
@@ -105,7 +105,7 @@ it('GET insights: entries count, 84-day window, per-habit last30, best streak, s
 	const r = await j(await call('GET', '/api/insights?today=2026-11-14'))
 	expect(r.entries).toBe(1)
 	expect(r.days.map((d: any) => d.day)).toEqual(['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04', '2026-11-13', '2026-11-14'])
-	expect(r.habits).toEqual([{ id: a, name: 'A', last30: 7, best_streak: 4, streak: 2 }]) // Oct 16..Nov 14 holds only the 2 November days: 2/30 -> 7
+	expect(r.habits).toEqual([{ id: a, name: 'A', last30: 7, done30: 2, span30: 30, best_streak: 4, streak: 2 }]) // Oct 16..Nov 14 holds only the 2 November days: 2/30 -> 7
 	expect((await call('GET', '/api/insights')).status).toBe(400)
 })
 
@@ -187,4 +187,23 @@ it('export with no data is just the header row', async () => {
 	const { call } = await signIn('a@x.test')
 	const text = (await (await call('GET', '/api/export')).text()).replace(/^﻿/, '')
 	expect(text).toBe('date,mood,went_well,hard,tomorrow\r\n')
+})
+
+it('GET day: last_active and prev_streak feed the welcome-back and streak-ended lines', async () => {
+	const { call } = await signIn('a@x.test')
+	const a = await mkHabit(call, 'A')
+	expect((await j(await call('GET', '/api/day/2026-11-14'))).last_active).toBe(null)
+	for (const d of ['2026-11-08', '2026-11-09', '2026-11-10']) await call('PUT', `/api/checkins/${a}/${d}`, { done: true })
+	await entry(call, '2026-11-11', { went_well: 'x' })
+	// today 14th: last active 11th (entry only), 2 full days away; yesterday (13th) missed, run ending the 12th is 0
+	let d = await j(await call('GET', '/api/day/2026-11-14'))
+	expect(d.last_active).toBe('2026-11-11')
+	expect(d.habits[0]).toMatchObject({ done: false, streak: 0, prev_streak: 0 })
+	// a 3-day run ending the 12th, nothing on the 13th: streak ended on the 14th
+	await call('PUT', `/api/checkins/${a}/2026-11-11`, { done: true })
+	await call('PUT', `/api/checkins/${a}/2026-11-12`, { done: true })
+	d = await j(await call('GET', '/api/day/2026-11-14'))
+	expect(d.habits[0]).toMatchObject({ streak: 0, prev_streak: 5 })
+	// on the 13th itself the unticked day still holds the run: no "ended" yet
+	expect((await j(await call('GET', '/api/day/2026-11-13'))).habits[0]).toMatchObject({ streak: 5, prev_streak: 0 })
 })
