@@ -291,7 +291,8 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .btn.ib svg { width: 18px; height: 18px; }
 .btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 #ins.locked .ic-filters { display: none; }
-#ins.locked .stat b, #ins.locked .chart, #ins.locked .hrow { opacity: .5; }
+#ins.locked .stat b { opacity: .75; }
+#ins.locked .plot, #ins.locked .hrow .meter { opacity: .5; } /* dim shapes only; text keeps 4.5:1 */
 #ins.locked .bar .fill { background: none; border: 1.5px dashed var(--muted); }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stat { padding: 6px 4px; text-align: center; display: grid; gap: 4px; align-content: start; }
@@ -1176,6 +1177,7 @@ $('#add-form').onsubmit = e => {
     for (let d = ms; d <= today; d = add(d, 1)) { const m = sample(d).mood; if (m) { wrote++; sum += m; } }
     const per = habits.map((h, k) => ({ name: h.name, ...streaks(k) }));
     const bestStreak = Math.max(...per.map(p => p.best)), curStreak = Math.max(...per.map(p => p.cur));
+    const msBest = locked ? 0 : bestStreak; // milestones read as unreached while the stats show a dash
     const bestBest = per.find(p => p.best === bestStreak), curBest = per.find(p => p.cur === curStreak);
     // best weekday over the last 12 weeks
     const dow = Array.from({ length: 7 }, () => [0, 0]);
@@ -1203,8 +1205,8 @@ $('#add-form').onsubmit = e => {
       <div class="glass ic"><div class="ic-head"><h2>Each habit</h2></div><p class="cap muted small" aria-live="polite" data-d="Last 30 days, and the longest streak ever."></p>
         <div class="ic-body">${per.map((p, k) => `<div class="hrow" tabindex="0" data-tip="${esc(`${p.name}: done ${Math.round(last30(k) * .3)} of the last 30 days. Current streak ${p.cur} days, best ${p.best} days.`)}"><span>${esc(p.name)}</span><span class="muted small">${last30(k)}% · best ${p.best} days</span><span class="meter" style="--p:${last30(k)}"><i></i></span></div>`).join('')}</div>
       </div>
-      <div class="glass ic"><div class="ic-head"><h2>Milestones</h2></div><p class="cap muted small" aria-live="polite" data-d="Your best streak: ${bestStreak} days."></p>
-        <div class="ic-body"><div class="miles">${MILES.map(m => bestStreak >= m ? `<span class="chip" tabindex="0" data-got role="img" aria-label="${m} days, reached" data-tip="Reached: your best streak hit ${m} days."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>` : `<span class="chip" tabindex="0" data-tip="${m - bestStreak} more days of a streak to reach ${m}. Your best so far is ${bestStreak}."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>`).join('')}</div></div>
+      <div class="glass ic"><div class="ic-head"><h2>Milestones</h2></div><p class="cap muted small" aria-live="polite" data-d="${locked ? 'Your best streak will show here.' : `Your best streak: ${bestStreak} days.`}"></p>
+        <div class="ic-body"><div class="miles">${MILES.map(m => msBest >= m ? `<span class="chip" tabindex="0" data-got role="img" aria-label="${m} days, reached" data-tip="Reached: your best streak hit ${m} days."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>` : `<span class="chip" tabindex="0" data-tip="${m - msBest} more days of a streak to reach ${m}. Your best so far is ${msBest}."><span class="medal">${ICON(MEDAL[m])}</span><span class="tx"><b>${m} days</b></span></span>`).join('')}</div></div>
       </div>`;
     $$('#ins .cap').forEach(t => t.textContent = t.dataset.d);
     $('#ins').classList.toggle('locked', locked);
@@ -1218,6 +1220,7 @@ $('#add-form').onsubmit = e => {
     $('#wk-g').onclick = e => { const b = e.target.closest('[data-g]'); if (b) { gr.g = b.dataset.g; drawBars(); } };
     $('#wk-p').onchange = e => { const [y, m] = e.target.value.split('-').map(Number); gr.y = y; if (gr.g !== 'month') gr.m = m; drawBars(); };
     drawBars();
+    if (locked) { const c = $('#wk-cap'); c.dataset.d = c.textContent = 'Your habit chart will show here.'; }
     if (locked) $('#wk').innerHTML = [35, 60, 45, 75, 55, 85, 50].map(p => `<div class="bar g-week"><span class="plot"><span class="fill" style="--p:${p}"></span></span><span class="lbl"></span></div>`).join('');
   }
   // Hover, focus or tap an item: its card's caption explains it; leaving restores the default.

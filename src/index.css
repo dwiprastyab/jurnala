@@ -290,7 +290,8 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .btn.ib svg { width: 18px; height: 18px; }
 .btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 #ins.locked .ic-filters { display: none; }
-#ins.locked .stat b, #ins.locked .chart, #ins.locked .hrow { opacity: .5; }
+#ins.locked .stat b { opacity: .75; }
+#ins.locked .plot, #ins.locked .hrow .meter { opacity: .5; } /* dim shapes only; text keeps 4.5:1 */
 #ins.locked .bar .fill { background: none; border: 1.5px dashed var(--muted); }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stat { padding: 6px 4px; text-align: center; display: grid; gap: 4px; align-content: start; }

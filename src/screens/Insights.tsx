@@ -62,6 +62,7 @@ export function Insights({ today, first }: { today: string; first: string }) {
   const n = d.habits.length
   const { current, best } = streakStats(d.habits)
   const bestH = d.habits.find((h) => h.best_streak === best), curH = d.habits.find((h) => h.streak === current)
+  const mb = locked ? 0 : best // Milestones read as unreached while the stats show a dash
   const ms = monthStats(d.days, today)
   const wd = bestWeekday(d.days, today, n, first)
   const bars = locked ? GHOST : chartDays ? series(chartDays, g, key, today, n, first) : []
@@ -128,11 +129,11 @@ export function Insights({ today, first }: { today: string; first: string }) {
       </div>
       <div className="glass ic">
         <div className="ic-head"><h2>Milestones</h2></div>
-        <Cap text={`Your best streak: ${best} days.`} />
+        <Cap text={locked ? 'Your best streak will show here.' : `Your best streak: ${best} days.`} />
         <div className="ic-body"><div className="miles">
-          {milestones(best).map((m) => (
+          {milestones(mb).map((m) => (
             <span key={m.n} className="chip" tabIndex={0} data-got={m.reached || undefined} role="img" aria-label={m.reached ? `${m.n}-day streak, reached` : `${m.n}-day streak, ${m.left} more days to go`}
-              data-tip={m.reached ? `Reached: your best streak hit ${m.n} days.` : `${m.left} more days of a streak to reach ${m.n}. Your best so far is ${best}.`}>
+              data-tip={m.reached ? `Reached: your best streak hit ${m.n} days.` : `${m.left} more days of a streak to reach ${m.n}. Your best so far is ${mb}.`}>
               <span className="medal"><Medal n={m.n} /></span><span className="tx"><b>{m.n} days</b></span>
             </span>
           ))}
