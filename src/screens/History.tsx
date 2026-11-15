@@ -50,7 +50,10 @@ sh.animate([{ transform: 'none', opacity: 1 }, { opacity: 0, offset: .1 }, { tra
 let done = false
 const end = () => { if (done) return; done = true; root.classList.remove('vs'); setLeaving(null) }
 out.finished.then(end, () => {})
-return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); sheet.current?.removeAttribute('style'); root.classList.remove('vs'); end() }
+return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); const sh = sheet.current
+    // leaving the calendar: close the panel in this same commit, or it shows for one frame at its old spot before the effect above closes it
+    if (sh && view !== 'cal' && sh.open) { sh.style.transition = 'none'; sh.close(); requestAnimationFrame(() => requestAnimationFrame(() => sh.removeAttribute('style'))) } else sh?.removeAttribute('style')
+    root.classList.remove('vs'); end() }
 }, [leaving]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picker, setPicker] = useState(false)
   const auto = useRef(true) // until the person picks a day, the panel follows the default
