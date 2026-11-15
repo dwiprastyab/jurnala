@@ -237,7 +237,7 @@ hr { border: 0; border-top: 1px solid var(--glass-line); margin: 0; width: 100%;
 .seg[aria-label="View"][data-on="ins"]::before { transform: translateX(calc(100% + 4px)); }
 ::view-transition-old(viewseg) { display: none; }
 ::view-transition-group(viewseg), ::view-transition-new(viewseg) { animation: none; }
-html.vs .history { clip-path: inset(-60px 0); } /* panes slide inside the content area, never over the side nav */
+html.vs .history { clip-path: inset(-100vh 0); } /* panes slide inside the content area, never over the side nav */
 .history { position: relative; }
 @media (prefers-reduced-motion: reduce) { .seg[aria-label="View"]::before, .seg[aria-label="View"] button { transition: none; } }
 ::view-transition-old(themeseg) { display: none; }
