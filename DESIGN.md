@@ -92,7 +92,7 @@ Mood 1–5: `#7C8DB5`, `#9DB4C8`, `#C9C2B0`, `#F2C894`, `#FFB37A`. Mood is never
 - Card: `background: var(--glass)`, `backdrop-filter: blur(24px) saturate(140%)`, 1px border `--line` (`--glass-line` in Classic), soft shadow.
 - At most two glass layers stacked (card, then a sheet over it).
 - Inputs and long text sit on glass. Short lines sit directly on the scene: greeting and date, screen titles and subtitles, `Yesterday you said`, the closing line.
-- Text contrast at least 4.5:1 in every phase, on the scene and on glass. **Not yet measured for Scenes** — measure in task B8 (method below) and fix tokens, not the SVGs.
+- Text contrast at least 4.5:1 in every phase, on the scene and on glass. Measured for Scenes in B8/B9 (see Contrast below); fix tokens, not the SVGs.
 - `prefers-reduced-transparency: reduce` → cards use `--solid`, no blur.
 - `prefers-reduced-motion: reduce` → no animations and no transitions at all, including inside the scene SVGs (each file already carries its own rule) and the 1.2 s cross-fade.
 
@@ -160,7 +160,7 @@ Four glass cards (one column on phone; two columns from 700px, the same width as
 - **Habits over time**: a `Day | Week | Month` group (`seg sm`) and a `Period` select. Day and Week show one month (a week belongs to the month of its Monday); Month shows one year. Bars up to 36px wide scrolling sideways (right-aligned, starts at the newest). A Y axis (`100%`, `50%`, `0%`) with three faint gridlines replaces the percentage written above each bar. The exact figure appears in the card's caption line and in a small blurred tooltip on hover, focus or tap.
 - **Each habit**: name, `87% · best 14 days`, a thin meter; list scrolls vertically.
 - **Milestones**: 7, 14, 30, 60, 100, 180, 365 days; reached ones show a medal icon (SVG, not emoji), the others read `30 days · 14 to go`; list scrolls vertically.
-- **Switching** Calendar ↔ Insights slides the pane (and the open day card) sideways; reduced motion: instant.
+- **Switching** Calendar ↔ Insights slides the pane sideways (1.4 s); the open day card should slide with it on wide screens (not built yet); reduced motion: instant.
 - Empty state before 7 entries: `Insights appear after a week of entries.` in one card.
 - No chart library: inline SVG or CSS only.
 
@@ -176,9 +176,9 @@ Each face sits in a wrapper with a bubble (`.tip`, `role="tooltip"`) above it. I
 
 Page headers (`.head`) have no box; see App shell above.
 
-**Scene mode.** Works in both themes (Classic shows the sky, the stars and the orb). Clicking the active tab (Today, History, Habits, Settings) again minimizes its cards into the tab with the same fly animation; clicking it once more brings them back. The eye button and the `Jurnala` brand also enter it. Classic night draws 220 stars. Cards fly to the current tab with a stagger, then only `Jurnala`, the tabs and the eye remain; the scene slowly zooms and the scrim lightens. Clicking the brand also shows the quote of the day as the header (30 original lines, picked by date, same all day); clicking it again, the eye, `Esc` or a tab leaves it. A tab click reveals that tab's cards flying back out of the tab, one by one. On phones the brand shows only in scene mode. Hidden in Classic. Reduced motion: instant.
+**Scene mode.** Works in both themes (Classic shows the sky, the stars and the orb). Clicking the active tab (Today, History, Habits, Settings) again minimizes its cards into the tab with the same fly animation; clicking it once more brings them back. The eye button and the `Jurnala` brand also enter it. Classic night draws 220 stars. Cards fly to the current tab with a stagger, then only `Jurnala`, the tabs and the eye remain; the scene slowly zooms and the scrim lightens. Clicking the brand also shows the quote of the day as the header (30 original lines, picked by date, same all day); clicking it again, the eye, `Esc` or a tab leaves it. A tab click reveals that tab's cards flying back out of the tab, one by one. On phones the brand shows only in scene mode. Reduced motion: instant.
 
-The scene fills 100dvh on tablet and desktop (it used to stop at the top of the content). A round eye button (`View scene`, `aria-pressed`) sits bottom right on every layout, above the phone nav. Pressing it hides the nav and all cards so the landscape is the whole screen; pressing it again or `Esc` brings them back. Changing screen also exits it. Not shown in Classic, which has no landscape.
+The scene fills 100dvh on tablet and desktop (it used to stop at the top of the content). A round eye button (`View scene`, `aria-pressed`) sits bottom right on every layout, above the phone nav. Pressing it hides the nav and all cards so the landscape is the whole screen; pressing it again or `Esc` brings them back. Changing screen also exits it. Shown in both themes (Classic shows its sky, stars and orb).
 
 ### Sign in layout
 
@@ -212,7 +212,9 @@ Motion only answers an action or the clock. Two curves: `--ease: cubic-bezier(.2
 | `Saved.` and the closing line | Fade in 400 ms |
 | Scene or sky phase change | 1.2 s cross-fade |
 | Switching theme (Scenes ↔ Classic) | Soft wipe, no hard cut |
-| Calendar ↔ Insights | Pane and day card slide sideways together |
+| Calendar ↔ Insights | Pane slides sideways, 1.4 s, `cubic-bezier(.65,0,.35,1)`. The open day card should travel with it on wide screens (**not built**: the sheet closes while the pane slides) |
+| Segmented pill (`Background`, `Calendar \| Insights`) | Pill glides 1.4 s |
+| Scene mode | Cards fly out 500 ms (60 ms stagger), back in 800 ms (80 ms stagger); scene zooms to 1.04 over 1.6 s; scrim to 35% |
 | Inside the scenes | Slow drifting clouds, twinkling stars, water shimmer, window lights; already in the SVGs |
 
 - Hover styles only under `@media (hover: hover)`.
