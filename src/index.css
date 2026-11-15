@@ -254,6 +254,7 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .cal-title { order: -1; margin-right: auto; }
 .cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cal-title { min-height: 44px; padding: 0 12px; border: 0; border-radius: 14px; background: transparent; font-family: var(--serif); font-size: 24px; display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 900px) { .cal-title { font-size: 20px; padding: 0 8px; white-space: nowrap; } } /* the month title stays on one line on phones */
 .picker { display: grid; gap: 16px; }
 .years { display: flex; align-items: center; justify-content: space-between; font-family: var(--serif); font-size: 22px; }
 .months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
