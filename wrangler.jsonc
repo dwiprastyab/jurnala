@@ -12,7 +12,7 @@
 		{
 			"binding": "DB",
 			"database_name": "jurnala",
-			"database_id": "00000000-0000-0000-0000-000000000000",
+			"database_id": "7b1046ad-6d35-4200-8994-53b2006c4771",
 			"migrations_dir": "migrations"
 		}
 	],

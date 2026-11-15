@@ -1,6 +1,6 @@
 // Uses only WebCrypto, so scripts/create-user.ts can import it under Node.
 
-// shortcut: not yet measured on the production free plan (task B2); lower if error 1102 appears
+// Measured on the production free plan (B2): 100,000 passes, see CLAUDE.md.
 export const PBKDF2_ITERATIONS = 100000
 
 export const SESSION_SECONDS = 30 * 24 * 3600

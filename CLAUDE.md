@@ -33,12 +33,12 @@ Habit tracker + guided daily reflection. A learning project: the main goal is to
 
 ## Spike result (fill in at B2)
 
-- PBKDF2-SHA256 iterations chosen: _not yet tested_
-- Observed on production free plan: _not yet tested_
+- PBKDF2-SHA256 iterations chosen: 100,000 (unchanged)
+- Observed on production free plan: 20/20 requests returned 200 at each of 100,000, 50,000 and 25,000 iterations, no error 1102 (2026-11-15, `jurnala.dwiprastyab.workers.dev`). `workers.dev` is blocked by some Indonesian ISP DNS (XL Axiata); use DoH (`curl --doh-url https://cloudflare-dns.com/dns-query`) or another DNS.
 
 ## Unverified assumptions
 
-Text contrast over the Scenes (Today measured in B8 at 390 and 1440, History, Habits and Settings in B9 at 390; all pass 4.5:1 in every phase and both themes, worst 4.83, see DESIGN.md; day sheet worst 4.50 and Insights 1440 worst 4.78 measured 2026-11-15 (glass dawn/dusk .62), not measured: Insights at 390, dialog buttons, scene animation; Today re-measured 2026-11-15 at glass .68 / .54: worst 4.68); scene SVG animation cost on low-end phones; D1 free daily row read/write quotas; the Workers runtime cap on PBKDF2 iterations (believed 100,000); whether `jurnala` is free as a Worker name on the Owner's account.
+Text contrast over the Scenes (Today measured in B8 at 390 and 1440, History, Habits and Settings in B9 at 390; all pass 4.5:1 in every phase and both themes, worst 4.83, see DESIGN.md; day sheet worst 4.50 and Insights 1440 worst 4.78 measured 2026-11-15 (glass dawn/dusk .62), not measured: Insights at 390, dialog buttons, scene animation; Today re-measured 2026-11-15 at glass .68 / .54: worst 4.68); scene SVG animation cost on low-end phones; D1 free daily row read/write quotas; the Workers runtime cap on PBKDF2 iterations (believed 100,000); whether `jurnala` is free as a Worker name on the Owner's account (resolved 2026-11-15: it was free).
 
 ## Agent skills
 
