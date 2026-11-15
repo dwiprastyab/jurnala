@@ -34,7 +34,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
   }, [mode])
 
   const ask = useRef<HTMLDivElement>(null)
-  useEffect(() => { if (asking) ask.current?.querySelector('button')?.focus() }, [asking]) // focus scrolls the question into view
+  useEffect(() => { if (asking) ask.current?.querySelector<HTMLButtonElement>('.quiet')?.focus() }, [asking]) // focus scrolls the question into view
 
   const dirty = mood !== (entry?.mood ?? null) || PROMPTS.some(([k]) => t[k] !== toTexts(entry)[k])
   const reset = () => { setMood(entry?.mood ?? null); setT(toTexts(entry)); setMsg(''); setAsking(false); focus.current = 'btn'; setMode('read') }

@@ -138,7 +138,7 @@ return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.canc
                       data-pre={pre || undefined} data-future={future || undefined} data-full={full || undefined}
                       data-mood={mood ?? undefined} style={mood ? col(`var(--mood-${mood})`) : undefined}
                       aria-current={key === today ? 'date' : undefined} aria-pressed={key === sel}
-                      aria-label={`${longDateY(key)}${pre ? ', before you joined' : mood ? `, ${MOODS[mood - 1]}, ${x!.done} of ${x!.total} habits done` : future ? '' : ', no reflection'}`}
+                      aria-label={`${longDateY(key)}${pre ? ', before you joined' : mood ? `, ${MOODS[mood - 1]}, ${x!.done} of ${x!.total} habits done` : future ? '' : x?.entry ? ', reflection without a mood' : ', no reflection'}`}
                       onClick={() => setSel(key)}><i>{Number(key.slice(8))}</i></button>
                   )
                 })}

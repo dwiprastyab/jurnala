@@ -219,7 +219,7 @@ hr { border: 0; border-top: 1px solid var(--glass-line); margin: 0; width: 100%;
 
 /* ---------- history ---------- */
 .seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--field); border: 1px solid var(--glass-line); }
-.seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; font-weight: 500; }
+.seg button { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; font-weight: 500; }
 .seg button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-ink); }
 /* Background switch: the pill glides across while the new background wipes in the same direction (1.4 s). */
 #theme-seg { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; }
@@ -275,7 +275,7 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .ins { display: grid; gap: 16px; align-content: start; }
 .ic { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
 .ic-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: none; }
-.ic-head .field { width: auto; min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.ic-head .field { width: auto; min-height: 44px; padding: 4px 10px; font-size: 14px; }
 .ic > p { margin: 0; flex: none; }
 .ic-body { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; }
 .ic-body.hscroll { overflow: hidden; align-content: stretch; display: flex; align-items: flex-end; justify-content: flex-end; gap: 4px; padding-bottom: 4px; }
@@ -283,7 +283,7 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .ic .cap, .ic > .cap { min-height: 2.8em; }
 #ins [data-tip] { cursor: default; border-radius: 12px; }
 #ins [data-tip]:hover, #ins [data-tip]:focus-visible { background: var(--field); outline: none; }
-.btn.ib { width: 40px; height: 40px; min-height: 0; padding: 0; display: inline-grid; place-items: center; flex: none; }
+.btn.ib { width: 44px; height: 44px; min-height: 0; padding: 0; display: inline-grid; place-items: center; flex: none; }
 .btn.ib svg { width: 18px; height: 18px; }
 .btn.ib:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -301,9 +301,9 @@ html.wipe-l::view-transition-new(root) { animation-name: wipe-l; -webkit-mask-im
 .ic { position: relative; }
 #ins [data-tip]::after { display: none; }
 .ic-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: none; }
-.ic-filters .field { width: auto; min-height: 32px; padding: 2px 10px; font-size: 14px; }
+.ic-filters .field { width: auto; min-height: 44px; padding: 2px 10px; font-size: 14px; }
 .seg.sm { padding: 3px; gap: 2px; }
-.seg.sm button { min-height: 32px; padding: 0 12px; font-size: 14px; }
+.seg.sm button { min-height: 44px; padding: 0 12px; font-size: 14px; }
 .hrow { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; font-size: 14px; line-height: 1.25; }
 .ic-body:has(.hrow) { gap: 8px; }
 .meter { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--field); overflow: hidden; }
