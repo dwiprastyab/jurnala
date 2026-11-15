@@ -48,7 +48,8 @@ sh.animate([{ transform: 'none', opacity: 1 }, { opacity: 0, offset: .1 }, { tra
 }
 }
 let done = false
-const end = () => { if (done) return; done = true; root.classList.remove('vs'); setLeaving(null) }
+// 'vs' (the clip) is removed only in the cleanup below, in the same commit that hides the leaving pane; removing it here showed that pane for one frame
+const end = () => { if (done) return; done = true; setLeaving(null) }
 out.finished.then(end, () => {})
 return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); const sh = sheet.current
     // leaving the calendar: close the panel in this same commit, or it shows for one frame at its old spot before the effect above closes it
