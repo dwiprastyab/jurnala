@@ -105,6 +105,7 @@ option { color: #2A2440; }
 #reflection { position: relative; }
 #reflection .row { position: absolute; top: 14px; right: 16px; gap: 8px; flex-wrap: nowrap; }
 #reflection .row #saved { order: -1; font-size: 14px; }
+#reflection .row[role="alertdialog"] { position: static; flex-wrap: wrap; gap: 12px; }
 #reflection .row [data-tip]::after { bottom: auto; top: calc(100% + 6px); left: auto; right: 0; transform: none; }
 .said { padding-bottom: 16px; border-bottom: 1px solid var(--glass-line); }
 .said .prompt { font-size: 22px; font-style: normal; margin-top: 2px; }

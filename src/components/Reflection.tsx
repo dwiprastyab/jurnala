@@ -33,6 +33,9 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
     focus.current = null
   }, [mode])
 
+  const ask = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (asking) ask.current?.querySelector('button')?.focus() }, [asking]) // focus scrolls the question into view
+
   const dirty = mood !== (entry?.mood ?? null) || PROMPTS.some(([k]) => t[k] !== toTexts(entry)[k])
   const reset = () => { setMood(entry?.mood ?? null); setT(toTexts(entry)); setMsg(''); setAsking(false); focus.current = 'btn'; setMode('read') }
   const cancel = () => (dirty ? setAsking(true) : reset())
@@ -69,7 +72,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
         )))}
       </div>
       {asking && (
-        <div className="row" role="alertdialog" aria-label="Discard changes?">
+        <div className="row" role="alertdialog" aria-label="Discard changes?" ref={ask}>
           <p className="prompt">Discard changes?</p>
           <button className="btn" type="button" onClick={reset}>Discard</button>
           <button className="btn quiet" type="button" onClick={() => { setAsking(false); first.current?.focus() }}>Keep editing</button>
