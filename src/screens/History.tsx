@@ -14,7 +14,7 @@ export function History({ user, onEdit }: { user: User; onEdit: (day: string) =>
   const [today] = useState(() => localDay())
   const first = user.created_at ? localDay(new Date(user.created_at)) : today
   const [month, setMonth] = useState(monthOf(today))
-  const [sel, setSel] = useState<string | null>(null)
+  const [sel, setSel] = useState<string | null>(() => (matchMedia(wideQuery).matches ? today : null)) // wide: the panel opens on today, as in the prototype
   const [view, setView] = useState<'cal' | 'ins'>('cal')
 const [leaving, setLeaving] = useState<'cal' | 'ins' | null>(null) // the pane sliding out; both panes exist while it runs
 const slideFrom = useRef<{ top: number; left: number; width: number } | null>(null)
