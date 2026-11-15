@@ -92,7 +92,14 @@ return () => { [from, to, sheet.current].forEach((x) => x?.getAnimations().forEa
   useEffect(() => {
     const d = sheet.current
     if (!d) return
-    if (!sel || (view !== 'cal' && leaving !== 'cal')) { if (d.open) d.close(); return }
+    if (!sel || (view !== 'cal' && leaving !== 'cal')) {
+      if (d.open) {
+        // wide: the card already slid away; it vanishes at once, with no fade at the old spot (the prototype's card.close())
+        if (wide) { d.style.transition = 'none'; requestAnimationFrame(() => requestAnimationFrame(() => d.removeAttribute('style'))) }
+        d.close()
+      }
+      return
+    }
     const picked = shown.current !== sel; shown.current = sel
     if (d.open) {
       // another day picked while the panel is open: the content fades up, as in the prototype
