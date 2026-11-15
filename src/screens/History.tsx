@@ -41,10 +41,10 @@ to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o
 // wide: the day panel is a second card; it travels with the calendar, as in the prototype
 const sh = sheet.current, sr = sheetFrom.current
 if (sh && matchMedia(wideQuery).matches && sel) {
-if (view === 'cal') { sh.style.transition = 'none'; sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o) }
+if (view === 'cal') { sh.style.transition = 'none'; sh.open = true; sh.animate([{ transform: `translateX(${dir * W}px)`, opacity: 0 }, { opacity: 0, offset: .9 }, { transform: 'none', opacity: 1 }], o) }
 else if (sr) {
 Object.assign(sh.style, { transition: 'none', position: 'absolute', top: sr.top + 'px', left: sr.left + 'px', width: sr.width + 'px', height: sr.height + 'px', maxHeight: 'none', margin: '0' })
-sh.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
+sh.animate([{ transform: 'none', opacity: 1 }, { opacity: 0, offset: .1 }, { transform: `translateX(${-dir * W}px)`, opacity: 0 }], o)
 }
 }
 let done = false

@@ -433,6 +433,7 @@ dialog dd { margin: 4px 0 0; color: var(--muted); }
   #mood-desc:empty { display: none; }
   #reflection .row { margin-top: auto; }
   .screen:not(.signin) > .ins:not([hidden]) { align-self: stretch !important; overflow: hidden !important; grid-template-rows: minmax(0, 1.12fr) minmax(0, 1fr); }
+  .screen:not(.signin) > .ins.locked:not([hidden]) { overflow-x: hidden !important; overflow-y: auto !important; grid-template-rows: none; grid-auto-rows: min-content; scrollbar-width: thin; scrollbar-color: var(--glass-line) transparent; } /* five cards: the pane scrolls, the header stays */
   .ins .stat b { font-size: 28px; }
   .ins .ic .prompt { font-size: 16px; }
   #sheet[open] { max-height: 100%; overflow: auto; align-self: start; }
@@ -1263,8 +1264,8 @@ $('#add-form').onsubmit = e => {
     sheet.style.transition = 'none'; // the day card only slides; no fade or lift of its own
     Object.assign(from.style, { position: 'absolute', top: r.top - par.top + 'px', left: r.left - par.left + 'px', width: r.width + 'px', height: r.height + 'px', maxHeight: 'none', margin: 0 });
     swap(); from.hidden = false;
-    if (card) { card.open = true; card.hidden = false; Object.assign(card.style, { position: 'absolute', top: sr.top - par.top + 'px', left: sr.left - par.left + 'px', width: sr.width + 'px', height: sr.height + 'px', maxHeight: 'none', margin: 0 }); card.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o); }
-    else if (!ins && wide.matches) sheet.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o);
+    if (card) { card.open = true; card.hidden = false; Object.assign(card.style, { position: 'absolute', top: sr.top - par.top + 'px', left: sr.left - par.left + 'px', width: sr.width + 'px', height: sr.height + 'px', maxHeight: 'none', margin: 0 }); card.animate([{ transform: 'none', opacity: 1 }, { opacity: 0, offset: .1 }, { transform: `translateX(${-dir * W}px)`, opacity: 0 }], o); }
+    else if (!ins && wide.matches) sheet.animate([{ transform: `translateX(${dir * W}px)`, opacity: 0 }, { opacity: 0, offset: .9 }, { transform: 'none', opacity: 1 }], o);
     else sheet.hidden = true;
     const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o);
     to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o);
