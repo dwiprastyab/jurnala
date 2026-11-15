@@ -27,9 +27,11 @@ Four inputs, always in this order. Each is optional, but at least one must be fi
 | # | Prompt | Input |
 |---|---|---|
 | 1 | `How did today feel?` | One tap on a 5-step scale of drawn faces (`design/mood/`): `Rough`, `Low`, `Okay`, `Good`, `Great`. Each face has a short description (table below) shown as a tooltip on hover and keyboard focus, and, for touch, as a line under the faces once a face is chosen (`Good: A good day. More ups than downs.`). Linked to the button with `aria-describedby`. The word also shows in the accessible label. |
-| 2 | `What went well today?` | Text |
-| 3 | `What was hard?` | Text |
-| 4 | `One thing for tomorrow` | Text |
+| 2 | `What went well today?` | Rich text (below) |
+| 3 | `What was hard today?` | Rich text |
+| 4 | `What's one thing for tomorrow?` | Rich text |
+
+**Rich text editor (prototype):** each answer is a formatted field, not a plain textarea. Tools top right of each answer: `Bold`, `Italic`, `Emoji` (a 16-emoji popover) and `Expand` (the field grows into a centred panel over a dimmed page, 380 ms; `Collapse`, a click outside or `Esc` closes it). Typing `- `, `* ` or `1. ` at the start of a line starts a bullet or numbered list. Paste is always plain text. The answer is stored as limited markdown, never HTML: `**bold**`, `*italic*`, `- ` bullets and `N. ` numbers (`\` escapes a literal `*`, `\` or leading `- `). Nothing else is formatted; the limit of 4,000 characters counts the markdown markers.
 
 **Two modes (approved):**
 - **Edit mode** — the form. A day with no saved reflection always opens as an empty form with `Save`. After saving: `Saved.`
@@ -59,9 +61,9 @@ One reflection per day. Saving again replaces it. Text limit: 4,000 characters p
 A month calendar (weeks start on Monday). The title shows the month; `Previous month` and `Next month` buttons move one month. The month can go back as far as the month the user signed up (earlier days are always empty) and never past the current month. Tapping the title opens a picker: a year stepper (sign-up year to this year), twelve month buttons (out-of-range months disabled) and a date field to jump to one day. `Back to this month` appears when another month is shown. After a year or more of use the user can flash back to any month or day.
 
 - One cell per day. The day number sits inside a circle: filled in the mood colour when a reflection exists, empty when nothing was saved. A small dot under the number means every habit was ticked. Days before sign-up are dimmed and cannot be opened. Today has an outline. Future days cannot be opened.
-- Legend under the grid: the five mood colours with their words, and `Every habit done` with the dot. Colour is never the only signal: each cell's accessible label names the day and the mood (`Friday, 6 November, mood Good` or `…, nothing saved`).
-- Tapping a day opens the day sheet: date, mood, the habits (`done` / `not done`), and the reflection in read mode with `Edit`. A day with nothing saved says `Nothing saved for this day.` and offers `Write about this day`.
-- The day sheet has `Previous day` and `Next day` (disabled on today), `Close`, `Esc` to close, and ← → keys to step. Stepping across a month boundary moves the calendar to that month.
+- Legend under the grid: the five mood colours with their words, and `Every habit done` with the dot. Colour is never the only signal: each cell's accessible label names the day, the mood and the habits (`Friday, 6 November 2026, Good, 3 of 4 habits done`, `…, no reflection` or `…, before you joined`).
+- Tapping a day opens the day sheet, a read-only summary: the date, a line with the mood and how many habits were done (`Good. 3 of 4 habits done.` or `Every habit done.`), and the three answers as formatted text. A day with nothing saved says `Nothing saved for this day.` The sheet does not list habits and has no `Previous day` / `Next day` and no arrow keys.
+- The sheet has two icon buttons: `Edit this day` and `Close` (`Esc` also closes). `Edit this day` closes the sheet and opens Today for that day: the title is the day's date, the line under it reads `You are editing a past day.`, the full habit list and reflection form are there (so a past day's habits can be ticked there), and a `Back to today` icon button returns to the real today.
 - Phones: the sheet rises from the bottom as a modal. From 700px it is a panel beside the calendar (see `DESIGN.md`).
 
 ### 5. Habits
@@ -70,7 +72,7 @@ Add, rename, reorder by drag and drop (or Arrow Up/Down on the grip), archive. A
 ### 6. Settings
 - **Appearance** (saved on this device only, in the browser; not synced between devices, not stored on the server):
   - `Background`: `Scenes (default)` — landscapes that change with the time of day — or `Classic` — a soft gradient with a sun or moon that follows the clock.
-  - `Preview time of day`: `Auto`, `Dawn`, `Day`, `Dusk`, `Night`. `Auto` follows the clock and is the default. The others force a phase on this device, which is also how to look at a scene outside its hours. Helper line: `Auto follows your clock. Saved on this device.`
+  - `Preview time of day`: a select with `Auto (your clock)`, `Dawn 05–09`, `Day 09–16`, `Dusk 16–19`, `Night 19–05`. `Auto` follows the clock and is the default. The others force a phase on this device, which is also how to look at a scene outside its hours. No helper line.
 - `Export my data (CSV)` downloads one CSV file: a row per day with a reflection, plus a 1/0 column per habit. Days with check-ins but no reflection are not included; the full backup is `wrangler d1 export`.
 - `Sign out`.
 
@@ -79,7 +81,7 @@ History has a `Calendar | Insights` switch. Insights shows only after 7 or more 
 - **This month**: current streak, best streak, days written, average mood; and, from 28 days of data, `Your best day for habits is Monday.`
 - **Habits over time**: share of habits done, as bars on a 0–100% axis. A `Day | Week | Month` switch picks the bar size, and a `Period` select picks what to show: Day and Week show one calendar month (a week belongs to the month of its Monday), Month shows one year. The select lists sign-up to now, newest first. The exact percentage shows on hover, focus or tap (and in the caption line), plus a message about the finished bars (feature 8, with "day", "week" or "month" in the wording). The newest bar is the current period so far and is not counted in the message.
 - **Each habit**: last-30-day percentage with a meter (a habit younger than 30 days is counted from its first day, so `done of the last N days` uses N under 30), and best streak ever.
-- **Milestones**: 7, 14, 30, 60, 100, 180 and 365 days of best streak, a medal icon when reached, or `30 days · 14 to go`.
+- **Milestones**: 7, 14, 30, 60, 100, 180 and 365 days of best streak, a medal icon when reached. Each chip shows the number in bold (`30 days`); the accessible label adds `reached` or `14 to go`.
 Numbers are always written out; colour or bar height is never the only signal. The 80% and 50% thresholds below are proposals, to be tuned after real use.
 
 ### 8. Encouragement (text only)
@@ -114,7 +116,7 @@ A habit's streak is the number of consecutive days with a check-in, counting bac
 
 ## Not in v1
 
-Public sign-up, self-service password reset, reminders or notifications, PWA or offline use, weekly or custom habit schedules, markdown or attachments, account deletion (required before any second user).
+Public sign-up, self-service password reset, reminders or notifications, PWA or offline use, weekly or custom habit schedules, attachments, images or links, any formatting beyond bold, italic and lists, account deletion (required before any second user).
 
 ## Success measures
 

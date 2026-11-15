@@ -26,7 +26,7 @@ The full text, including every exact message, is in [`docs/PRD.md`](docs/PRD.md)
 
 ### What v1 deliberately does not do
 
-Public sign-up, self-service password reset, reminders or notifications, PWA or offline use, weekly or custom habit schedules, markdown or attachments, and account deletion. The last two groups are required before any second user is allowed.
+Public sign-up, self-service password reset, reminders or notifications, PWA or offline use, weekly or custom habit schedules, attachments or any formatting beyond bold, italic and lists, and account deletion. The last two groups are required before any second user is allowed.
 
 ## Tech stack (decided, final for v1)
 

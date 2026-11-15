@@ -5,7 +5,7 @@ Two references, both approved:
 - **Scenes (default theme):** the live board https://claude.ai/artifact/NeCzjFJPkNC1BATiBCQX3y (Today, History, Settings) and the standalone SVGs in `design/scenes/` (see `design/scenes/README.md`, reference CSS in `design/scenes/layout.css`).
 - **Classic (optional theme):** `design/mockup.html`. It is also the reference for every component (rows, mood picker, nav, motion CSS).
 
-Where this file and a reference disagree, the reference wins. Copy CSS custom properties; do not re-derive them.
+Where this file and a reference disagree, the reference wins. `design/mockup.html` is the single source of truth for requirements: this file describes it, never overrides it. Copy CSS custom properties; do not re-derive them.
 
 ## Idea: coming home at dusk
 
@@ -135,7 +135,7 @@ Navigation changes per width; see Layouts.
 
 ### Reflection card: read and edit
 
-- **Edit mode** (no saved reflection, or after `Edit`): the four prompts from `docs/PRD.md` in order. Prompt labels in Newsreader italic. Mood picker is five round buttons, each showing a face from `design/mood/` (`1-rough` … `5-great`, 48×48 viewBox, filled in the mood colour, features in `#2A2440`). Inline them as SVG, not `<img>`, so focus and selected states can style them. The chosen face scales up with `--spring` and its word appears under the row; unchosen faces are dimmed to 80% (the 70% first drawn looked muddy on the dark glass). No emoji anywhere: faces render the same on every device. Read mode shows the chosen face small (24px) next to its word. Do not edit the SVGs; report problems to the Owner. Text areas grow with content, 4,000-character limit (show a counter only past 3,600). Actions are icon-only 40px round buttons in the card's top-right corner (tick = save, cross = cancel; label shown on hover/focus as a tooltip that opens downward, and in `aria-label`). Same rule app-wide: Edit, Close and Back are icon buttons with a hover label; text buttons stay for Export my data (CSV), Sign out, tabs, the segmented switch and the sign-in form. Fields are at least 52px tall at 760px viewport height.
+- **Edit mode** (no saved reflection, or after `Edit`): the four prompts from `docs/PRD.md` in order. Prompt labels in Newsreader italic. Mood picker is five round buttons, each showing a face from `design/mood/` (`1-rough` … `5-great`, 48×48 viewBox, filled in the mood colour, features in `#2A2440`). Inline them as SVG, not `<img>`, so focus and selected states can style them. The chosen face scales up with `--spring` and its word appears under the row; unchosen faces are dimmed to 80% (the 70% first drawn looked muddy on the dark glass). No emoji in the UI chrome: the mood faces render the same on every device. The only emoji are the ones the user inserts with the editor's `Emoji` tool. Read mode shows the chosen face small (24px) next to its word. Do not edit the SVGs; report problems to the Owner. Answers are rich text fields (contenteditable) that grow with content: tools `Bold`, `Italic`, `Emoji` (16-emoji popover) and `Expand` (centred panel over a dimmed page, 380 ms, `Esc` collapses), plain-text paste, `- ` / `* ` / `1. ` start a list, stored as limited markdown (see PRD feature 3). 4,000-character limit; input past it is reverted. No counter. Actions are icon-only 40px round buttons in the card's top-right corner (tick = save, cross = cancel; label shown on hover/focus as a tooltip that opens downward, and in `aria-label`). Same rule app-wide: Edit, Close and Back are icon buttons with a hover label; text buttons stay for Export my data (CSV), Sign out, tabs, the segmented switch and the sign-in form. Fields are at least 52px tall at 760px viewport height.
 - **Read mode**: mood dot + word on one line, then each filled answer as a small muted label over the text. Empty answers are not shown. One `Edit` button, top right of the card. Saved reflections are never shown as disabled inputs.
 - **Today layout details**: on 700px and up the greeting and the card titles stay fixed while each card body scrolls. A reflection field grows with its text up to 7 lines, then scrolls; the expand control makes one field fill the whole card. Typing `- ` or `1. ` at the start of a line continues the list on Enter (Enter on an empty item ends it). Edit is an icon button, not text.
 - **Switching**: the card keeps its height while content cross-fades (240 ms) so the page does not jump. `Saved.` fades in under the card for a few seconds after a save, then stays out of the way. Focus moves as described in the PRD.
@@ -146,10 +146,10 @@ Navigation changes per width; see Layouts.
 - Picker (replaces the grid while open): year stepper bounded by sign-up year and this year; 12 month buttons, out-of-range ones disabled; a native date field with min = sign-up day and max = today for jumping to one day. `Back to this month` link under the grid when another month is shown.
 - Grid: 7 columns, weekday letters M T W T F S S, 5–6 rows, cells 48px. The day number sits inside a 36px circle: filled in the mood colour with dark text when a reflection exists, a faint outline when not. A small dot under the number = all habits ticked (replaces the earlier ring). Today = a 2px ring. Days before sign-up and future days are dimmed and not buttons. Days outside the month are blank.
 - Legend under the grid: the five mood swatches with their words, and the dot with `Every habit done`.
-- Each cell is a button whose label reads `Friday, 6 November, mood Good` or `Friday, 6 November, nothing saved`.
-- **Day sheet** (phone: modal `<dialog>` rising from the bottom with a backdrop; 700px and up: a panel beside the calendar). Contents top to bottom: header with `Previous day`, the date, `Next day`, `Close` (phone); habit list as `done` / `not done` rows (read-only in the sheet — ticking happens on Today, to keep one place for it); reflection card in read mode with `Edit`; or `Nothing saved for this day.` with `Write about this day`.
-- Keyboard: `Esc` closes (phone); ← → step days; focus returns to the calendar cell that opened the sheet.
-- Open question for the Owner, not built: letting the sheet tick habits for past days. v1 says read-only; revisit if it annoys.
+- Each cell is a button whose label reads `Friday, 6 November 2026, Good, 3 of 4 habits done`, `…, no reflection` or `…, before you joined`.
+- **Day sheet** (phone: modal `<dialog>` rising from the bottom with a backdrop; 700px and up: a panel beside the calendar). A read-only summary, top to bottom: the date (Newsreader), a line `Good. 3 of 4 habits done.` (or `Every habit done.`, or `Nothing saved for this day.`), the three prompts as a definition list with the answers rendered from markdown, then two icon buttons: `Edit this day` and `Close`. No habit list, no `Previous day` / `Next day`. `Edit this day` opens Today for that day (`You are editing a past day.`, a `Back to today` icon button).
+- Keyboard: `Esc` closes the sheet (also on wide screens); focus returns to the calendar cell that opened it. No arrow-key stepping.
+- Past-day habit ticking happens on Today after `Edit this day` (decided: the prototype wins).
 
 ### Insights
 
@@ -159,7 +159,7 @@ Four glass cards (one column on phone; two columns from 700px, the same width as
 - Every item (stat, bar, habit row, milestone chip) is focusable and, on hover, focus or tap, rewrites its card's caption line (`.cap`) with a detail sentence; leaving restores the default caption. Details live in `data-tip`, not in the DOM tooltip.
 - **Habits over time**: a `Day | Week | Month` group (`seg sm`) and a `Period` select. Day and Week show one month (a week belongs to the month of its Monday); Month shows one year. Bars up to 36px wide scrolling sideways (right-aligned, starts at the newest). A Y axis (`100%`, `50%`, `0%`) with three faint gridlines replaces the percentage written above each bar. The exact figure appears in the card's caption line and in a small blurred tooltip on hover, focus or tap.
 - **Each habit**: name, `87% · best 14 days`, a thin meter; list scrolls vertically.
-- **Milestones**: 7, 14, 30, 60, 100, 180, 365 days; reached ones show a medal icon (SVG, not emoji), the others read `30 days · 14 to go`; list scrolls vertically.
+- **Milestones**: 7, 14, 30, 60, 100, 180, 365 days; reached ones show a medal icon (SVG, not emoji), the others read `30 days` in bold (the accessible label adds `reached` or `14 to go`); list scrolls vertically.
 - **Switching** Calendar ↔ Insights slides the pane sideways (1.4 s); the open day card should slide with it on wide screens (not built yet); reduced motion: instant.
 - Empty state before 7 entries: `Insights appear after a week of entries.` in one card.
 - No chart library: inline SVG or CSS only.
@@ -187,9 +187,9 @@ From 700px the form sits in the left column (420px) so the sun and horizon on th
 ### Settings: Appearance
 
 - `Background` (the only place to switch it; there is no switcher on other screens) — a two-option segmented control (radio group): `Scenes` with a small phase thumbnail, `Classic` with a small gradient thumbnail. Selecting applies immediately, cross-fading.
-- `Preview time of day` — a five-option segmented control: `Auto`, `Dawn`, `Day`, `Dusk`, `Night`. Helper line: `Auto follows your clock. Saved on this device.`
+- `Preview time of day` — a select: `Auto (your clock)`, `Dawn 05–09`, `Day 09–16`, `Dusk 16–19`, `Night 19–05`. No helper line.
 - Native selects (month/year pickers) use a custom chevron, not the browser arrow.
-- Both controls are radio groups with real `<input type="radio">` and visible focus. Arrow keys move within the group.
+- `Background` is a two-option segmented control (buttons with `aria-pressed`) and `Preview time of day` is a native select, both with visible focus.
 
 ## Motion
 
@@ -260,7 +260,20 @@ First pass failed (lowest values before the fix): Scenes dawn sub line 2.58, Sce
 
 Legend worst: 7.32 (Classic dawn). Day numbers worst: 7.35 (Scenes dawn). No fix was needed for B9. Day cells that are disabled (before sign-up, or in the future) are dimmed to 30% on purpose and are not measured: WCAG exempts inactive controls, and the accessible label says why ("before you joined").
 
-Not measured: the day sheet and the discard dialog, text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run), Insights, and widths other than 390 for these three screens.
+Not measured: the discard dialog, text over the scene while it animates (SVG animation inside `<img>` cannot be sampled frame by frame; one frame per run), Insights, and widths other than 390 for History and Settings. The day sheet is a glass panel with the same tokens as the cards and was not measured separately.
+
+#### Prototype glass values vs build (2026-11-15) — OPEN, Owner decides
+
+The prototype sets Scenes glass to day `.55` and dawn `.46`; the build uses `.68` and `.54` because of the contrast fix above. Worst-case method (all text hidden, lightest background pixel behind each text box on Today, ink `#FBF7F0` / muted `#ECE8F4`), same run for both:
+
+| Scenes, Today | Prototype (.55 / .46) | Build (.68 / .54) |
+|---|---|---|
+| dawn 390 | 3.88 | 4.68 |
+| day 390 | 4.92 | 6.84 |
+| dawn 1440 | 4.30 | 5.05 |
+| day 1440 | 3.66 | 5.31 |
+
+The prototype values fail 4.5:1 in three of four runs, the build values pass. The build keeps `.68` / `.54` until the Owner decides; the glass row in the token table above lists the prototype values.
 
 ## Copy
 

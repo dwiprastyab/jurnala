@@ -13,7 +13,7 @@ Source of truth for request and response shapes. The backend (B4–B6) implement
 - A resource that does not exist or belongs to another user is the same `404 {"error":"Not found."}`. Never reveal which.
 - Unknown JSON fields are ignored. Wrong types → `400 {"error":"That isn't valid."}`.
 - `day` path parameters must match `^\d{4}-\d{2}-\d{2}$` and be a real calendar date, else `400 {"error":"That date isn't valid."}`. Days later than tomorrow (server UTC date + 1) are rejected the same way, to absorb time zones without trusting the client completely.
-- Text answers: strings, trimmed, at most 4,000 characters, else `400 {"error":"Keep each answer under 4,000 characters."}`. Empty string and `null` both mean "no answer" and are stored as `null`.
+- Text answers: strings, trimmed, at most 4,000 characters, else `400 {"error":"Keep each answer under 4,000 characters."}`. Empty string and `null` both mean "no answer" and are stored as `null`. The text is limited markdown written by the editor (`**bold**`, `*italic*`, `- ` and `N. ` lists, `\` escapes); the server stores and returns it as is, never as HTML, and counts the markers toward the 4,000.
 
 ## Auth
 
@@ -122,7 +122,7 @@ Inclusive range, at most 42 days, `from` ≤ `to`; otherwise `400 {"error":"Pick
 ### `GET /api/export`
 `200`, `Content-Type: text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="jurnala-export-YYYY-MM-DD.csv"` (server UTC date; this is the one place the server picks a date, and it only names a file). UTF-8 with BOM. Never JSON.
 
-One row per day that has a saved reflection, oldest first. Columns: `date,mood,went_well,hard,tomorrow`, then one `1`/`0` column per habit (header = habit name, archived habits included, in `sort` order). `mood` is 1–5, or empty. Cells that contain a comma, quote or newline are quoted (`"` doubled). A cell starting with `=`, `+`, `-`, `@`, tab or CR gets a leading `'` so spreadsheets do not run it as a formula.
+One row per day that has a saved reflection, oldest first. Columns: `date,mood,went_well,hard,tomorrow`, then one `1`/`0` column per habit (header = habit name, archived habits included, in `sort` order). `mood` is 1–5, or empty. Text cells hold the stored markdown, so markers such as `**` show up in them. Cells that contain a comma, quote or newline are quoted (`"` doubled). A cell starting with `=`, `+`, `-`, `@`, tab or CR gets a leading `'` so spreadsheets do not run it as a formula.
 ```csv
 date,mood,went_well,hard,tomorrow,Read,Walk
 2026-11-14,4,"Shipped it, finally",,Rest,1,0
