@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { addDays } from './day'
-import { bestWeekday, milestones, monthStats, pct, streakStats, weekBars, weekMessage } from './insights'
+import { addDays, diffDays } from './day'
+import { bestWeekday, milestones, monthStats, pct, periodMessage, periods, rangeOf, series, streakStats } from './insights'
 
 const today = '2026-11-15' // a Sunday
 const day = (d: string, done = 0, mood: number | null = 3, entry = false) => ({ day: d, mood, entry: mood !== null || entry, done, total: 4 })
 
-describe('weekMessage', () => {
+describe('periodMessage', () => {
   it.each([
     [[100], 'A perfect week. Well earned.'],
     [[90, 85, 80, 80], 'Four weeks of steady effort. Be proud of that.'],
@@ -14,25 +14,46 @@ describe('weekMessage', () => {
     [[70], 'A steady week. Every bit counts.'],
     [[40], "A slow week happens. Don't lose heart. Tomorrow we build a better day."],
     [[], ''],
-  ])('%j', (ps, msg) => expect(weekMessage(ps)).toBe(msg))
+  ])('%j', (ps, msg) => expect(periodMessage('week', ps)).toBe(msg))
+  it('uses the unit', () => expect(periodMessage('month', [100])).toBe('A perfect month. Well earned.'))
 })
 
-describe('weekBars', () => {
-  it('splits Monday to Sunday and marks the week containing today live', () => {
-    const days = [day('2026-11-09', 4), day('2026-11-10', 2), day('2026-11-15', 4)]
-    const bars = weekBars(days, today, 4, '2026-11-01')
-    const last = bars[bars.length - 1]
-    expect(last.start).toBe('2026-11-09')
-    expect([last.done, last.poss, last.p]).toEqual([10, 28, 36])
-    expect(last.live).toBe(true) // today (the Sunday) is still in progress
-    expect(bars[0].start).toBe('2026-10-26')
+describe('periods and rangeOf', () => {
+  it('lists sign-up month to now, newest first', () => expect(periods('2026-09-20', today)).toEqual(['2026-11', '2026-10', '2026-09']))
+  it('crosses a year', () => expect(periods('2025-12-31', '2026-01-02')).toEqual(['2026-01', '2025-12']))
+  it('a week range starts on a Monday and fits the 42-day API cap', () => {
+    const [a, z] = rangeOf('week', '2026-11')
+    expect([a, z]).toEqual(['2026-10-26', '2026-12-06'])
+    expect(diffDays(z, a) + 1).toBeLessThanOrEqual(42)
   })
-  it('counts only days from sign-up, and the week still running is live', () => {
-    const bars = weekBars([], '2026-11-12', 4, '2026-11-11')
+})
+
+describe('series', () => {
+  it('week: Monday to Sunday, live week, a week belongs to the month of its Monday', () => {
+    const days = [day('2026-11-09', 4), day('2026-11-10', 2), day('2026-11-15', 4)]
+    const bars = series(days, 'week', '2026-11', today, 4, '2026-11-01')
+    const last = bars[bars.length - 1]
+    expect(bars.map((b) => b.start)).toEqual(['2026-11-02', '2026-11-09'])
+    expect([last.done, last.poss, last.p, last.live]).toEqual([10, 28, 36, true])
+    expect(bars[0].live).toBe(false)
+  })
+  it('counts only days from sign-up', () => {
+    const bars = series([], 'week', '2026-11', '2026-11-12', 4, '2026-11-11')
     expect(bars).toHaveLength(1)
     expect([bars[0].poss, bars[0].live]).toEqual([8, true])
   })
-  it('caps at the 84-day window', () => expect(weekBars([], today, 4, '2020-01-01').length).toBeLessThanOrEqual(13))
+  it('day: one bar per day up to today, from sign-up', () => {
+    const bars = series([day('2026-11-15', 2)], 'day', '2026-11', today, 4, '2026-11-10')
+    expect(bars.map((b) => b.label)).toEqual(['10', '11', '12', '13', '14', '15'])
+    expect([bars[5].p, bars[5].live]).toEqual([50, true])
+  })
+  it('month: skips months before sign-up and after today', () => {
+    const bars = series([day('2026-10-05', 4)], 'month', '2026', today, 4, '2026-10-01')
+    expect(bars.map((b) => b.label)).toEqual(['Oct', 'Nov'])
+    expect(bars[0].poss).toBe(31 * 4)
+    expect(bars[1].live).toBe(true)
+  })
+  it('nothing counts before sign-up', () => expect(series([], 'week', '2026-10', today, 4, '2026-11-12')).toEqual([]))
 })
 
 describe('bestWeekday', () => {

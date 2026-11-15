@@ -1,9 +1,9 @@
 import { useEffect, useState, type MouseEvent, type FocusEvent } from 'react'
-import { api, type InsightsData } from '../api'
-import { shortDate } from '../day'
+import { api, type HistoryDay, type InsightsData } from '../api'
+import { addDays, diffDays, monthTitle } from '../day'
 import { Medal } from '../icons'
 import { MOODS } from '../mood'
-import { bestWeekday, milestones, MIN_ENTRIES, monthStats, pct, streakStats, weekBars, weekMessage } from '../insights'
+import { bestWeekday, milestones, MIN_ENTRIES, monthStats, pct, periodMessage, periods, rangeOf, series, streakStats, type Group } from '../insights'
 
 // Hover, focus or click on a [data-tip] item swaps its card's caption; leaving restores it.
 const tipOf = (e: { target: EventTarget }) => (e.target as HTMLElement).closest?.<HTMLElement>('[data-tip]') ?? null
@@ -14,11 +14,32 @@ const hide = (e: MouseEvent | FocusEvent) => {
   if (t && !t.contains(e.relatedTarget as Node | null)) { const c = card(t); c.textContent = c.dataset.d! }
 }
 
+// /api/history takes at most 42 days per call, so a long range is fetched in chunks.
+async function historyRange(from: string, to: string): Promise<HistoryDay[]> {
+  const jobs: Promise<{ days: HistoryDay[] }>[] = []
+  for (let a = from; diffDays(a, to) <= 0; a = addDays(a, 42)) jobs.push(api.history(a, diffDays(addDays(a, 41), to) > 0 ? to : addDays(a, 41)))
+  return (await Promise.all(jobs)).flatMap((r) => r.days)
+}
+
 export function Insights({ today, first }: { today: string; first: string }) {
   const [d, setD] = useState<InsightsData | null>(null)
   const [err, setErr] = useState('')
   const load = () => { setErr(''); api.insights(today).then(setD, (e) => setErr(e.message)) }
   useEffect(load, [today]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Habits-over-time: Day / Week inside one month, Month inside one year.
+  const [g, setG] = useState<Group>('week')
+  const [period, setPeriod] = useState(today.slice(0, 7))
+  const [chartDays, setChartDays] = useState<HistoryDay[] | null>(null)
+  const [chartErr, setChartErr] = useState('')
+  const key = g === 'month' ? period.slice(0, 4) : period
+  useEffect(() => {
+    let live = true
+    setChartErr(''); setChartDays(null)
+    const [a, z] = rangeOf(g, key)
+    historyRange(diffDays(a, first) < 0 ? first : a, diffDays(z, today) > 0 ? today : z).then((r) => live && setChartDays(r), (e) => live && setChartErr(e.message))
+    return () => { live = false }
+  }, [g, key, first, today])
 
   if (err) return <div className="ins" id="ins"><p className="glass" role="alert">{err} <button className="btn text" type="button" onClick={load}>Try again</button></p></div>
   if (!d) return <div className="ins" id="ins"><p className="glass muted" role="status">Loading…</p></div>
@@ -29,8 +50,10 @@ export function Insights({ today, first }: { today: string; first: string }) {
   const bestH = d.habits.find((h) => h.best_streak === best), curH = d.habits.find((h) => h.streak === current)
   const ms = monthStats(d.days, today)
   const wd = bestWeekday(d.days, today, n, first)
-  const bars = weekBars(d.days, today, n, first)
-  const msg = weekMessage(bars.filter((b) => !b.live).map((b) => b.p))
+  const bars = chartDays ? series(chartDays, g, key, today, n, first) : []
+  const msg = periodMessage(g, bars.filter((b) => !b.live).map((b) => b.p))
+  const months = periods(first, today)
+  const years = [...new Set(months.map((m) => m.slice(0, 4)))]
   const avg = ms.avgMood ? `Average mood so far: ${MOODS[ms.avgMood - 1]}.` : ''
   const ev = { onMouseOver: show, onFocus: show, onClick: show, onMouseOut: hide, onBlur: hide }
 
@@ -49,14 +72,22 @@ export function Insights({ today, first }: { today: string; first: string }) {
       </div>
       <div className="glass ic">
         <div className="ic-head"><h2>Habits over time</h2></div>
-        <Cap cls="prompt" text={msg || 'Habits done per week.'} />
+        <div className="ic-filters">
+          <div className="seg sm" role="group" aria-label="Group by">
+            {(['day', 'week', 'month'] as const).map((x) => <button key={x} type="button" aria-pressed={g === x} onClick={() => { setG(x); if (x !== 'month' && period.length === 4) setPeriod(today.slice(0, 7)) }}>{x[0].toUpperCase() + x.slice(1)}</button>)}
+          </div>
+          <select className="field" aria-label="Period" value={g === 'month' ? key : period} onChange={(e) => setPeriod(e.target.value)}>
+            {(g === 'month' ? years : months).map((v) => <option key={v} value={v}>{g === 'month' ? v : monthTitle(v)}</option>)}
+          </select>
+        </div>
+        <Cap cls="prompt" text={chartErr || (chartDays ? msg || `Habits done per ${g}.` : 'Loading…')} />
         <div className="chart">
           <div className="yax" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
           <div className="ic-body hscroll">
             {bars.map((w) => (
-              <div key={w.start} className="bar g-week" tabIndex={0} data-tip={`Week of ${shortDate(w.start)}: ${w.done} of ${w.poss} habit check-ins done (${w.p}%).${w.live ? ' Still in progress.' : ''}`}>
+              <div key={w.start} className={`bar g-${g}`} tabIndex={0} data-tip={`${w.tip}: ${w.done} of ${w.poss} habit check-ins done (${w.p}%).${w.live ? ' Still in progress.' : ''}`}>
                 <span className="plot"><span className="fill" style={{ '--p': w.p } as React.CSSProperties} /></span>
-                <span className="lbl">{shortDate(w.start)}</span>
+                <span className="lbl">{g !== 'day' || +w.label === 1 || +w.label % 5 === 0 || w.live ? w.label : ''}</span>
               </div>
             ))}
           </div>
@@ -67,7 +98,7 @@ export function Insights({ today, first }: { today: string; first: string }) {
         <Cap text="Last 30 days, and the longest streak ever." />
         <div className="ic-body">
           {d.habits.map((h) => (
-            <div key={h.id} className="hrow" tabIndex={0} data-tip={`${h.name}: done ${Math.round(h.last30 * 0.3)} of the last 30 days. Current streak ${h.streak} days, best ${h.best_streak} days.`}>
+            <div key={h.id} className="hrow" tabIndex={0} data-tip={`${h.name}: done ${h.done30} of the last ${h.span30} days. Current streak ${h.streak} days, best ${h.best_streak} days.`}>
               <span>{h.name}</span><span className="muted small">{h.last30}% · best {h.best_streak} days</span>
               <span className="meter" style={{ '--p': h.last30 } as React.CSSProperties}><i /></span>
             </div>

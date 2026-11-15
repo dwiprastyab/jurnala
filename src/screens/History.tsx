@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { api, type DayData, type HistoryDay, type User } from '../api'
 import { addDays, addMonths, daysInMonth, localDay, longDateY, monthOf, monthTitle, MONTH_ABBR, weekdayMon } from '../day'
 import { Chevron } from '../icons'
@@ -16,6 +16,30 @@ export function History({ user }: { user: User }) {
   const [month, setMonth] = useState(monthOf(today))
   const [sel, setSel] = useState<string | null>(null)
   const [view, setView] = useState<'cal' | 'ins'>('cal')
+const [leaving, setLeaving] = useState<'cal' | 'ins' | null>(null) // the pane sliding out; both panes exist while it runs
+const slideFrom = useRef<{ top: number; left: number; width: number } | null>(null)
+const go = (next: 'cal' | 'ins') => {
+if (next === view || leaving) return
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setView(next)
+const el = document.getElementById(view)!, r = el.getBoundingClientRect(), par = el.offsetParent!.getBoundingClientRect()
+slideFrom.current = { top: r.top - par.top, left: r.left - par.left, width: r.width }
+setLeaving(view); setView(next)
+}
+// Calendar is the left option: going to Insights the content slides left to right; back, right to left. 1400 ms.
+useLayoutEffect(() => {
+if (!leaving || !slideFrom.current) return
+const from = document.getElementById(leaving)!, to = document.getElementById(view)!, root = document.documentElement
+const dir = view === 'ins' ? -1 : 1, W = from.offsetParent!.clientWidth + 32, o: KeyframeAnimationOptions = { duration: 1400, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' }
+const f = slideFrom.current
+root.classList.add('vs')
+Object.assign(from.style, { position: 'absolute', top: f.top + 'px', left: f.left + 'px', width: f.width + 'px', margin: '0' })
+const out = from.animate([{ transform: 'none' }, { transform: `translateX(${-dir * W}px)` }], o)
+to.animate([{ transform: `translateX(${dir * W}px)` }, { transform: 'none' }], o)
+let done = false
+const end = () => { if (done) return; done = true; root.classList.remove('vs'); setLeaving(null) }
+out.finished.then(end, () => {})
+return () => { [from, to].forEach((x) => x.getAnimations().forEach((a) => a.cancel())); from.removeAttribute('style'); root.classList.remove('vs'); end() }
+}, [leaving]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picker, setPicker] = useState(false)
   const [py, setPy] = useState(Number(today.slice(0, 4)))
   const [days, setDays] = useState<Map<string, HistoryDay>>(new Map())
@@ -77,12 +101,12 @@ export function History({ user }: { user: User }) {
       <div className="head">
         <div><h1>History</h1><p className="muted">Every day since you joined</p></div>
         <div className="seg" role="group" aria-label="View" data-on={view}>
-          <button type="button" aria-pressed={view === 'cal'} onClick={() => setView('cal')}>Calendar</button>
-          <button type="button" aria-pressed={view === 'ins'} onClick={() => setView('ins')}>Insights</button>
+          <button type="button" aria-pressed={view === 'cal'} onClick={() => go('cal')}>Calendar</button>
+          <button type="button" aria-pressed={view === 'ins'} onClick={() => go('ins')}>Insights</button>
         </div>
       </div>
 
-      {view === 'cal' ? (
+      {view === 'cal' || leaving === 'cal' ? (
         <div className="glass stack" id="cal">
           <div className="cal-head">
             <button className="icon-btn" type="button" aria-label="Previous month" disabled={month <= minMonth} onClick={() => setMonth(addMonths(month, -1))}><Chevron d="M15 6l-6 6 6 6" /></button>
@@ -140,7 +164,7 @@ export function History({ user }: { user: User }) {
         {sel && <DaySheet key={sel} day={sel} first={first} today={today} onStep={stepDay} onClose={() => sheet.current?.close()} onSaved={() => setN((v) => v + 1)} />}
       </dialog>
 
-      {view === 'ins' && <Insights today={today} first={first} />}
+      {(view === 'ins' || leaving === 'ins') && <Insights today={today} first={first} />}
     </section>
   )
 }
