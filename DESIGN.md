@@ -281,3 +281,13 @@ Method: all text hidden, screenshot, 98th-percentile brightest pixel behind each
 - Insights at 1440, first pass at glass dusk `.40` / dawn `.54`: dusk 2.76 ("Your best streak"), dawn 4.24 ("Milestones"). Cause: the sun sits right behind the Milestones card. Fix: dusk and dawn glass `.62`. After: dawn 5.21, dusk 4.78 (day 5.17 and night 6.65 unchanged; Classic 6.97–11.01).
 - Insights at 390 and the discard dialog buttons: no reliable number (the method breaks on bordered or filled buttons). Discard: `#2A2440` on `#FBF7F0`, about 14:1 by hand.
 - Bug found by this pass and fixed (fc120df): the "Discard changes?" row was positioned over the heading.
+
+#### Other checks (2026-11-15, dev build)
+
+- Horizontal overflow: `scrollWidth == innerWidth` on Today, History, Habits and Settings at 320, 390, 820 and 1440.
+- Reduced motion: 0 running page animations (3 without it). The scene SVGs animate inside `<img>`, so that is not measurable from the page; each file carries its own `prefers-reduced-motion` rule (grep: 1 per file).
+- Favicon: `favicon.svg` and `favicon-32.png` read clearly at 16 px on white and on dark.
+- Touch targets at 390 (settled screens): all at least 44 px except `Edit reflection` 40, the Calendar|Insights and Scenes|Classic switch buttons 40, and the Insights Day|Week|Month and Period controls 32. The prototype draws the switch buttons at 40 (`.seg button`). Open question for the Owner.
+- Time zones: Pacific/Kiritimati shows Sunday 15 November and calls `/api/day/2026-11-15`; Pacific/Pago_Pago shows Saturday 14 November and calls `/api/day/2026-11-14`.
+- Offline: a habit tick rolls back and shows "Can't reach the server…" with Try again; History shows the same; both recover when back online.
+- Keyboard: Tab order covers every control with a visible ring and cycles without a trap; a calendar day opens with Enter and Esc closes the sheet.
