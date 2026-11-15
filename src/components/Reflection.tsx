@@ -57,10 +57,12 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
       <h2>{title}</h2>
       {said && <div className="said"><p className="muted small">Yesterday you said</p><p className="prompt">{said}</p></div>}
       <div className="rbody">
-        <fieldset className="moods" disabled={read}>
-          <legend className="prompt">How did today feel?</legend>
-          <MoodPicker value={mood} onPick={setMood} />
-        </fieldset>
+        {!(read && mood === null) && ( // read mode shows only what was filled in
+          <fieldset className="moods" disabled={read}>
+            <legend className="prompt">How did today feel?</legend>
+            <MoodPicker value={mood} onPick={setMood} />
+          </fieldset>
+        )}
         {PROMPTS.map(([k, q, ph, small], i) => (read && !t[k] ? null : (
           <div className={`ed${read ? ' ro' : ''}`} key={k}>
             <div className="ed-top"><span className="prompt" id={`q-${k}`}>{q}</span></div>
