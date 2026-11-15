@@ -43,14 +43,14 @@ Copy `design/scenes/*.svg` to `public/scenes/`. Do not edit the SVGs by hand.
 |---|---|
 | `--ink` | `#FBF7F0` |
 | `--muted` | `#ECE8F4` |
-| `--glass` | `rgb(20 16 48 / .40)`; day `rgb(20 16 56 / .68)`; dawn `rgb(20 16 56 / .54)` |
+| `--glass` | `rgb(20 16 48 / .40)`; day `rgb(20 16 56 / .68)`; dawn and dusk `rgb(20 16 56 / .62)` |
 | `--line` | `rgb(255 255 255 / .22)` |
 | `--field` | `rgb(255 255 255 / .10)` |
 | `--solid` (no-transparency fallback) | `#1F1B45` |
 | `--glow` (ticked habit) | `#FFD9A0` |
 | `--btn-bg` / `--btn-ink` | `#FBF7F0` / `#2A2440` |
 
-Day and dawn glass is more opaque because those scenes are bright behind the card.
+Day, dawn and dusk glass is more opaque because those scenes are bright behind the card.
 
 **Day scene (current).** Lilac/periwinkle palette so it sits in the same family as dawn and dusk: sky `#8FA0E6` → `#BFD3F0` → `#F1F3EA`, lake `#B8D6EA` → `#4C80A0`, greens hue-shifted toward blue-green and desaturated, a faint lilac haze over the whole group. Natural grass runs to the bottom edge (no water reaches it). A modern angler fishes from a motorboat that shuttles in and out on a 48 s loop (catch, jump, release); ducks swim slowly, turn at the ends and the ducklings trail the mother. Under reduced motion all of it freezes in a sane static pose.
 
@@ -272,3 +272,12 @@ The prototype first set Scenes glass to day `.55` and dawn `.46`. Those fail 4.5
 | day 390 | 4.92 | 6.84 |
 | dawn 1440 | 4.30 | 5.05 |
 | day 1440 | 3.66 | 5.31 |
+
+#### Insights, day sheet, discard dialog (2026-11-15)
+
+Method: all text hidden, screenshot, 98th-percentile brightest pixel behind each text range vs the computed text colour (buttons and selects skipped: border and focus ring distort the sample).
+
+- Day sheet: worst 4.50 (Scenes dawn, 1440).
+- Insights at 1440, first pass at glass dusk `.40` / dawn `.54`: dusk 2.76 ("Your best streak"), dawn 4.24 ("Milestones"). Cause: the sun sits right behind the Milestones card. Fix: dusk and dawn glass `.62`. After: dawn 5.21, dusk 4.78 (day 5.17 and night 6.65 unchanged; Classic 6.97–11.01).
+- Insights at 390 and the discard dialog buttons: no reliable number (the method breaks on bordered or filled buttons). Discard: `#2A2440` on `#FBF7F0`, about 14:1 by hand.
+- Bug found by this pass and fixed (fc120df): the "Discard changes?" row was positioned over the heading.
