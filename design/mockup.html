@@ -94,18 +94,21 @@ button { cursor: pointer; }
 .app { max-width: 480px; margin: 0 auto; padding: 16px 16px 128px; }
 option { color: #2A2440; }
 .screen { display: grid; gap: 16px; animation: fade .24s var(--ease); }
+.screen > * { min-width: 0; } /* a wide child must shrink or wrap, never widen the page (320px) */
 .col { display: grid; gap: 16px; align-content: start; min-width: 0; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
 [role="status"]:not(:empty), #closing { animation: fade .4s var(--ease); }
 .glass { background: var(--glass); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); border: 1px solid var(--glass-line); border-radius: 24px; box-shadow: var(--shadow); padding: 20px; transition: background-color .6s ease, border-color .6s ease; }
-.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 4px 8px; }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 4px 8px; }
 .head p { margin-top: 6px; }
 .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-line); background: var(--glass); display: grid; place-items: center; flex: none; }
 /* first row of the reflection card, so both Today cards start at the same height */
 /* Save/Edit and Cancel are small icon buttons in the card's top-right corner, so the answers get the room */
 #reflection { position: relative; }
 #reflection .row { position: absolute; top: 14px; right: 16px; gap: 8px; flex-wrap: nowrap; }
-#reflection .row #saved { order: -1; font-size: 14px; }
+#reflection #saved { font-size: 14px; margin-top: -8px; } #reflection #saved:empty { display: none; }
+/* the title leaves room for the buttons in the corner (one in read mode, two in edit mode) */
+#reflection h2 { padding-right: 64px; } #reflection[data-mode="edit"] h2 { padding-right: 112px; }
 #reflection .row [data-tip]::after { bottom: auto; top: calc(100% + 6px); left: auto; right: 0; transform: none; }
 .said { padding-bottom: 16px; border-bottom: 1px solid var(--glass-line); }
 .said .prompt { font-size: 22px; font-style: normal; margin-top: 2px; }
@@ -518,6 +521,7 @@ dialog dd { margin: 4px 0 0; color: var(--muted); }
 
     <form class="glass stack" id="reflection">
       <h2>Today's reflection</h2>
+      <p class="muted" id="saved" role="status"></p>
       <div class="said">
         <p class="muted small">Yesterday you said</p>
         <p class="prompt">Call Mum before dinner.</p>
@@ -538,7 +542,6 @@ dialog dd { margin: 4px 0 0; color: var(--muted); }
       <div class="row">
         <button class="btn" id="rf-btn" type="submit">Save</button>
         <button class="btn quiet" id="rf-cancel" type="button" hidden>Cancel</button>
-        <p class="muted" id="saved" role="status"></p>
       </div>
     </form>
 

@@ -59,6 +59,7 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
   return (
     <form className={bare ? 'stack' : 'glass stack'} id="reflection" data-mode={mode} onSubmit={submit} onKeyDown={(e) => { if (e.key === 'Escape' && saved && !read) { e.stopPropagation(); e.preventDefault(); cancel() } }} noValidate>
       <h2>{title}</h2>
+      <p className="muted" id="saved" role="status">{msg}</p>
       {said && <div className="said"><p className="muted small">Yesterday you said</p><p className="prompt">{said}</p></div>}
       <div className="rbody">
         {!(read && mood === null) && ( // read mode shows only what was filled in
@@ -81,7 +82,6 @@ export function Reflection({ day, entry, title = "Today's reflection", said, onS
       <div className="row">
         <button className="btn ib" ref={btn} type="submit" data-tip={label} aria-label={label} disabled={busy}>{read ? <Pencil /> : <Tick />}</button>
         {!read && saved && <button className="btn quiet ib" type="button" data-tip="Cancel changes" aria-label="Cancel changes" onClick={cancel}><Cross /></button>}
-        <p className="muted" id="saved" role="status">{msg}</p>
       </div>
     </form>
   )
